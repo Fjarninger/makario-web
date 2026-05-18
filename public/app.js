@@ -1,0 +1,1105 @@
+/* ═══════════════════════════════════════════════════════════════
+   MAKARIO — app.js  |  API + Mode démo intégré
+   ═══════════════════════════════════════════════════════════════
+   → Si le backend (node server.js) tourne sur localhost:3000,
+     toutes les données sont persistées en JSON.
+   → Sinon, l'app fonctionne en mode démo avec localStorage.
+   ═══════════════════════════════════════════════════════════════ */
+
+// ⚠️ Après déploiement Railway, remplace l'URL ci-dessous par la tienne
+const RAILWAY_URL  = 'https://REMPLACER-PAR-TON-URL.railway.app';
+
+const _isLocal     = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const SOCKET_URL   = _isLocal ? 'http://localhost:3000' : RAILWAY_URL;
+const API_URL      = SOCKET_URL + '/api';
+let   USE_MOCK     = false;
+let   socket       = null;
+
+// ─── DONNÉES MOCK (mode démo) ──────────────────────────────────────
+const MOCK = {
+  companies: [
+    { id:1, name:'SIGTH-TECH CONGO', sector:'TIC', city:'Brazzaville', services:'Développement web et mobile, solutions informatiques sur mesure, hébergement cloud.', vision:'Être le partenaire N°1 du peuple congolais dans le domaine des TIC.', address:'84, Rue Mayama, Brazzaville', cover:'💻', init:'ST' },
+    { id:2, name:'BEST INFORMATIQUE', sector:'TIC', city:'Pointe-Noire', services:'Vente de matériel informatique, maintenance, formation, réseaux.', vision:'Digitaliser les entreprises congolaises à moindre coût.', address:'Centre-ville, Pointe-Noire', cover:'🖥️', init:'BI' },
+    { id:3, name:'EGCM', sector:'Éducation & Formation', city:'Brazzaville', services:'Formation professionnelle qualifiante, coaching emploi, stages en entreprise.', vision:"Former la jeunesse congolaise pour l'emploi de demain.", address:'84, Rue Mayama, Immeuble BGF1, 1er étage', cover:'📚', init:'EG' },
+    { id:4, name:'AOFIP', sector:'Éducation & Formation', city:'Brazzaville', services:'Formation professionnelle et qualifiante, insertion professionnelle, coaching.', vision:"Vers l'emploi, mais pas seul.", address:'Rue Matsoua, Brazzaville', cover:'🎓', init:'AO' },
+    { id:5, name:'AI COMMUNICATION', sector:'TIC', city:'Brazzaville', services:'Agence de communication digitale, création de contenu, réseaux sociaux, branding.', vision:'Booster la visibilité des marques congolaises.', address:'Plateau de 15 ans, Brazzaville', cover:'📡', init:'AI' },
+    { id:6, name:'MAGIC DESIGN', sector:'Culture & Arts', city:'Pointe-Noire', services:"Design graphique, identité visuelle, création de logo, impression.", vision:"L'art au service des entreprises.", address:'Lumumba, Pointe-Noire', cover:'🎨', init:'MD' },
+    { id:7, name:'MUSAS CONGO', sector:'Commerce', city:'Brazzaville', services:'Distribution alimentaire, import-export, grossiste, livraison.', vision:'Nourrir le Congo, de Brazzaville à Owando.', address:'Marché Total, Brazzaville', cover:'🛒', init:'MC' },
+    { id:8, name:'BTP PRO CONGO', sector:'BTP', city:'Dolisie', services:'Construction, rénovation, génie civil, architecture, études techniques.', vision:'Bâtir le Congo moderne, pierre par pierre.', address:'Centre, Dolisie', cover:'🏗️', init:'BP' },
+  ],
+  sectors: [
+    { id:'tic', label:'TIC', icon:'💻', count:124 },
+    { id:'commerce', label:'Commerce', icon:'🛒', count:312 },
+    { id:'services', label:'Prestations de services', icon:'⚙️', count:198 },
+    { id:'btp', label:'BTP', icon:'🏗️', count:87 },
+    { id:'tourisme', label:'Tourisme & Restauration', icon:'🍽️', count:64 },
+    { id:'culture', label:'Culture & Arts', icon:'🎨', count:43 },
+    { id:'sante', label:'Santé', icon:'🏥', count:91 },
+    { id:'education', label:'Éducation & Formation', icon:'📚', count:76 },
+  ],
+  news: [
+    { id:1, company:'EGCM', avatar:'EG', title:'Formation Femme & TIC — Inscriptions ouvertes!', body:'La prochaine session de formation Excel, comptabilité et bureautique commence le 14 Mars.', emoji:'📊', date: new Date(Date.now()-3600000).toISOString(), likes:24, comments:[] },
+    { id:2, company:'AOFIP', avatar:'AO', title:"Offre de stage bénévole en entreprise", body:"Je prépare mon stage en entreprise. Vers l'emploi mais pas seul.", emoji:'💼', date: new Date(Date.now()-7200000).toISOString(), likes:41, comments:[] },
+    { id:3, company:'AI COMMUNICATION', avatar:'AI', title:'Nouveau service : Community Management', body:'Nous lançons notre offre de gestion des réseaux sociaux pour les PME.', emoji:'📱', date: new Date(Date.now()-86400000).toISOString(), likes:18, comments:[] },
+    { id:4, company:'SIGTH-TECH CONGO', avatar:'ST', title:"Développement d'application mobile sur mesure", body:"Vous avez un projet d'application ? Nous transformons vos idées en solutions numériques performantes.", emoji:'📲', date: new Date(Date.now()-172800000).toISOString(), likes:56, comments:[] },
+  ],
+};
+
+function mockDB(key, def) {
+  try { return JSON.parse(localStorage.getItem('mk_'+key)) || def; } catch { return def; }
+}
+function mockSave(key, val) { localStorage.setItem('mk_'+key, JSON.stringify(val)); }
+
+// ─── ÉTAT GLOBAL ──────────────────────────────────────────────────
+let token        = localStorage.getItem('makario_token') || null;
+let currentUser  = JSON.parse(localStorage.getItem('makario_user')||'null');
+let companiesAll = [];
+let navHistory   = ['home'];
+let currentConvId = null;
+let likedNewsIds  = JSON.parse(localStorage.getItem('makario_liked')||'[]');
+let mockNews      = mockDB('news', [...MOCK.news]);
+
+// ─── COUCHE API (réel ou mock) ────────────────────────────────────
+
+async function apiFetch(method, path, body) {
+  if (USE_MOCK) return mockFetch(method, path, body);
+  try {
+    const opts = { method, headers: { 'Content-Type':'application/json', ...(token?{'Authorization':'Bearer '+token}:{}) } };
+    if (body) opts.body = JSON.stringify(body);
+    const res  = await fetch(API_URL + path, opts);
+    return await res.json();
+  } catch {
+    USE_MOCK = true;
+    return mockFetch(method, path, body);
+  }
+}
+
+async function apiUpload(formData) {
+  if (USE_MOCK) {
+    // Mode démo : lire le fichier et retourner une data URL locale
+    return new Promise(resolve => {
+      const file = formData.get('file');
+      if (!file) return resolve({ success:false, error:'Aucun fichier' });
+      const reader = new FileReader();
+      reader.onload = e => resolve({ success:true, data:{ url: e.target.result, filename:'demo', size: file.size, demo:true } });
+      reader.readAsDataURL(file);
+    });
+  }
+  try {
+    const res = await fetch(API_URL + '/upload', {
+      method: 'POST',
+      headers: token ? { 'Authorization':'Bearer '+token } : {},
+      body: formData
+    });
+    return await res.json();
+  } catch {
+    return { success:false, error:'Upload impossible — vérifiez la connexion' };
+  }
+}
+
+function mockFetch(method, path, body) {
+  // Simule latence réseau
+  return new Promise(resolve => setTimeout(() => resolve(mockRoute(method, path, body)), 120));
+}
+
+function mockRoute(method, path, body) {
+  const parts = path.split('/').filter(Boolean);
+  const resource = parts[0];
+  const id = parts[1] ? parseInt(parts[1]) : null;
+  const sub = parts[2];
+
+  if (resource === 'health') return { success:true, message:'Mode démo actif' };
+
+  // AUTH
+  if (resource === 'auth') {
+    const action = parts[1];
+    if (action === 'register') {
+      const users = mockDB('users',[]);
+      if (users.find(u=>u.email===body.email)) return {success:false,error:'Email déjà utilisé'};
+      const user = {id:Date.now(),name:body.name,email:body.email,avatar:body.name.slice(0,1).toUpperCase(),createdAt:new Date().toISOString()};
+      users.push(user);
+      mockSave('users',users);
+      const t = 'demo_' + btoa(JSON.stringify(user));
+      localStorage.setItem('makario_token', t);
+      localStorage.setItem('makario_user', JSON.stringify(user));
+      if (body.company?.name) {
+        const companies = mockDB('companies',[...MOCK.companies]);
+        const newCo = {id:Date.now()+1,...body.company,init:body.company.name.slice(0,2).toUpperCase(),cover:'🏢',ownerId:user.id,createdAt:new Date().toISOString()};
+        companies.push(newCo);
+        mockSave('companies',companies);
+      }
+      return {success:true,data:{token:t,user}};
+    }
+    if (action === 'login') {
+      const users = mockDB('users',[]);
+      const user = users.find(u=>u.email===body.email);
+      if (!user) return {success:false,error:'Email ou mot de passe incorrect'};
+      const t = 'demo_' + btoa(JSON.stringify(user));
+      localStorage.setItem('makario_token', t);
+      localStorage.setItem('makario_user', JSON.stringify(user));
+      return {success:true,data:{token:t,user}};
+    }
+    if (action === 'me') {
+      if (!currentUser) return {success:false,error:'Non authentifié'};
+      return {success:true,data:currentUser};
+    }
+  }
+
+  // COMPANIES
+  if (resource === 'companies') {
+    const companies = mockDB('companies',[...MOCK.companies]);
+    if (method==='GET'&&!id) return {success:true,data:companies};
+    if (method==='GET'&&id) { const c=companies.find(x=>x.id===id); return c?{success:true,data:c}:{success:false,error:'Introuvable'}; }
+    if (method==='POST') {
+      if (!currentUser) return {success:false,error:'Non authentifié'};
+      const c = {id:Date.now(),...body,init:(body.name||'').slice(0,2).toUpperCase(),cover:'🏢',ownerId:currentUser.id,createdAt:new Date().toISOString()};
+      companies.push(c); mockSave('companies',companies);
+      return {success:true,data:c};
+    }
+  }
+
+  // SECTORS
+  if (resource === 'sectors') return {success:true,data:MOCK.sectors};
+
+  // NEWS
+  if (resource === 'news') {
+    const news = mockDB('news',[...MOCK.news]);
+    if (method==='GET'&&!id&&!sub) return {success:true,data:[...news].reverse()};
+    if (method==='POST'&&!id) {
+      if (!currentUser) return {success:false,error:'Non authentifié'};
+      const n = {id:Date.now(),...body,company:currentUser.name,avatar:currentUser.avatar,date:new Date().toISOString(),likes:0,comments:[]};
+      news.push(n); mockSave('news',news);
+      return {success:true,data:n};
+    }
+    if (id&&sub==='like') {
+      const n=news.find(x=>x.id===id); if(n){n.likes++;mockSave('news',news);return {success:true,data:n};}
+    }
+    if (id&&sub==='unlike') {
+      const n=news.find(x=>x.id===id); if(n){n.likes=Math.max(0,n.likes-1);mockSave('news',news);return {success:true,data:n};}
+    }
+  }
+
+  // FAVORITES
+  if (resource === 'favorites') {
+    if (!currentUser) return {success:false,error:'Non authentifié'};
+    const favs = mockDB('favs_'+currentUser.id,[]);
+    const companies = mockDB('companies',[...MOCK.companies]);
+    if (method==='GET') { const list=companies.filter(c=>favs.includes(c.id)); return {success:true,data:list}; }
+    if (method==='POST'&&id) {
+      if (favs.includes(id)) return {success:false,error:'Déjà en favoris'};
+      favs.push(id); mockSave('favs_'+currentUser.id,favs); return {success:true};
+    }
+    if (method==='DELETE'&&id) {
+      const idx=favs.indexOf(id); if(idx>-1){favs.splice(idx,1);mockSave('favs_'+currentUser.id,favs);} return {success:true};
+    }
+  }
+
+  // CONVERSATIONS
+  if (resource === 'conversations') {
+    if (!currentUser) return {success:false,error:'Non authentifié'};
+    const convs = mockDB('convs',[]);
+    if (method==='GET'&&!id) return {success:true,data:convs.filter(c=>c.participants.includes(currentUser.id)).map(c=>({...c,preview:'',time:'',unread:0}))};
+    if (method==='POST'&&!id) {
+      const existing = convs.find(c=>c.participants.includes(currentUser.id)&&c.participants.includes(body.recipientId));
+      if (existing) return {success:true,data:existing};
+      const conv = {id:Date.now(),participants:[currentUser.id,body.recipientId],companyId:body.companyId||null,createdAt:new Date().toISOString()};
+      convs.push(conv); mockSave('convs',convs); return {success:true,data:conv};
+    }
+    if (id&&sub==='messages') {
+      const msgs = mockDB('msgs_'+id,[]);
+      if (method==='GET') return {success:true,data:msgs.map(m=>({...m,sent:m.senderId===currentUser.id}))};
+      if (method==='POST') {
+        const msg={id:Date.now(),conversationId:id,senderId:currentUser.id,senderName:currentUser.name,text:body.text,date:new Date().toISOString(),read:false};
+        msgs.push(msg); mockSave('msgs_'+id,msgs); return {success:true,data:{...msg,sent:true}};
+      }
+    }
+  }
+
+  // STATS
+  if (resource === 'stats') {
+    const companies = mockDB('companies',[...MOCK.companies]);
+    const users = mockDB('users',[]);
+    const news = mockDB('news',[...MOCK.news]);
+    return {success:true,data:{totalCompanies:companies.length,totalUsers:users.length,totalNews:news.length,totalSectors:MOCK.sectors.length}};
+  }
+
+  // SUBSCRIPTIONS
+  if (resource === 'subscriptions') {
+    if (!currentUser) return {success:false,error:'Non authentifié'};
+    const subs = mockDB('subscriptions',{});
+    if (method==='GET') return {success:true,data:subs[currentUser.id]||null};
+    if (method==='POST') {
+      subs[currentUser.id] = {...body, activatedAt:new Date().toISOString(), userId:currentUser.id};
+      mockSave('subscriptions',subs);
+      return {success:true,data:subs[currentUser.id]};
+    }
+  }
+
+  // AUTH PROFILE UPDATE
+  if (resource === 'auth' && parts[1] === 'profile' && method === 'PUT') {
+    if (!currentUser) return {success:false,error:'Non authentifié'};
+    const users = mockDB('users',[]);
+    const idx = users.findIndex(u=>u.id===currentUser.id);
+    if (idx>-1) {
+      if (body.name) users[idx].name=body.name;
+      if (body.profession!==undefined) users[idx].profession=body.profession;
+      if (body.city!==undefined) users[idx].city=body.city;
+      if (body.avatar!==undefined) users[idx].avatar=body.avatar;
+      mockSave('users',users);
+      const {password,...safe}=users[idx];
+      currentUser=safe;
+      localStorage.setItem('makario_user',JSON.stringify(currentUser));
+      return {success:true,data:safe};
+    }
+    return {success:false,error:'Utilisateur introuvable'};
+  }
+
+  return {success:false,error:'Route inconnue'};
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  let t = document.getElementById('toast-msg');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast-msg';
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:80vw;text-align:center';
+    document.body.appendChild(t);
+  }
+  t.style.background = type==='error'?'#EF4444':type==='success'?'#2ED47A':'#1E66FF';
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._timer); t._timer = setTimeout(()=>{t.style.opacity='0';},2800);
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById('page-'+page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  if (navHistory[navHistory.length-1]!==page) navHistory.push(page);
+  const map = {home:loadHome,explore:loadExplore,news:loadNews,messages:loadMessages,favorites:loadFavorites,profile:loadProfile,dashboard:loadDashboard};
+  if (map[page]) map[page]();
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  if (navHistory.length>1){navHistory.pop();goTo(navHistory[navHistory.length-1]);}
+}
+
+function formatTime(d) {
+  const dt=new Date(d),now=new Date(),diff=now-dt;
+  if(diff<60000)return "À l'instant";
+  if(diff<3600000)return`Il y a ${Math.floor(diff/60000)} min`;
+  if(diff<86400000)return`Il y a ${Math.floor(diff/3600000)}h`;
+  return dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+}
+
+// ─── COMPOSANTS ───────────────────────────────────────────────────
+function companyCard(c) {
+  return `<div class="company-card" onclick="openCompany(${c.id})">
+    <div class="cc-cover"><div class="cc-avatar" style="font-size:28px;background:linear-gradient(135deg,#1E66FF22,#2ED47A22)">${c.cover||c.init}</div></div>
+    <div class="cc-body">
+      <div class="cc-header">
+        <div><h4 class="cc-name">${c.name}</h4><span class="cc-sector">${c.sector} · ${c.city}</span></div>
+        <button class="fav-btn" onclick="toggleFav(event,${c.id})" data-company-id="${c.id}" style="font-size:18px;background:none;border:none;cursor:pointer;color:#ccc">♡</button>
+      </div>
+      <p class="cc-services">${(c.services||'').slice(0,90)}…</p>
+      <div class="cc-actions">
+        <button class="btn-sm btn-primary" onclick="event.stopPropagation();openCompany(${c.id})">Voir</button>
+        <button class="btn-sm btn-outline" onclick="event.stopPropagation();contactCompany(${c.id})">Contacter</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function newsCard(n) {
+  const liked=likedNewsIds.includes(n.id);
+  return `<article class="news-card" id="news-card-${n.id}">
+    <div class="nc-header">
+      <div class="nc-avatar">${n.avatar||'?'}</div>
+      <div class="nc-meta"><strong>${n.company||'Entreprise'}</strong><span>${formatTime(n.date)}</span></div>
+    </div>
+    ${n.emoji?`<div style="font-size:32px;margin:10px 0">${n.emoji}</div>`:''}
+    <h4 class="nc-title">${n.title}</h4>
+    <p class="nc-body">${n.body}</p>
+    ${n.image?`<img src="${n.image}" alt="" style="width:100%;border-radius:12px;margin:10px 0;max-height:220px;object-fit:cover;display:block"/>`:''}
+    <div class="nc-actions">
+      <button class="nc-btn${liked?' liked':''}" id="like-btn-${n.id}" onclick="toggleLike(${n.id})" style="${liked?'color:#1E66FF':''}">
+        ${liked?'♥':'♡'} <span id="likes-count-${n.id}">${n.likes}</span>
+      </button>
+      <button class="nc-btn" onclick="showToast('Commentaire bientôt disponible')">💬 ${(n.comments||[]).length}</button>
+      <button class="nc-btn" onclick="showToast('Lien copié !')">↗ Partager</button>
+    </div>
+  </article>`;
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────
+async function loadHome() {
+  if (companiesAll.length===0){const r=await apiFetch('GET','/companies');if(r.success)companiesAll=r.data;}
+  const spotlight=document.getElementById('spotlight-list');
+  if (spotlight) spotlight.innerHTML=companiesAll.slice(0,4).map(c=>`
+    <div class="spotlight-card" onclick="openCompany(${c.id})" style="cursor:pointer;background:#fff;border-radius:16px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);min-width:140px;flex-shrink:0">
+      <div style="font-size:36px;margin-bottom:8px">${c.cover||c.init}</div>
+      <div style="font-weight:700;font-size:12px;color:#0D1931;margin-bottom:4px">${c.name}</div>
+      <div style="font-size:11px;color:#1E66FF;font-weight:600">${c.sector}</div>
+      <div style="font-size:10px;color:#6B7280">📍 ${c.city}</div>
+    </div>`).join('');
+  const sectorsEl=document.getElementById('sectors-home');
+  if (sectorsEl&&!sectorsEl.dataset.loaded){
+    const rs=await apiFetch('GET','/sectors');
+    if(rs.success){sectorsEl.innerHTML=rs.data.map(s=>`<div class="sector-pill" onclick="exploreSector('${s.label}')" style="cursor:pointer;background:#fff;border-radius:12px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)"><div style="font-size:28px">${s.icon}</div><div style="font-weight:700;font-size:12px;margin-top:4px">${s.label}</div><div style="font-size:10px;color:#6B7280">${s.count}+</div></div>`).join('');sectorsEl.dataset.loaded='1';}
+  }
+}
+
+// ─── EXPLORE ──────────────────────────────────────────────────────
+async function loadExplore(){
+  if(companiesAll.length===0){const r=await apiFetch('GET','/companies');if(r.success)companiesAll=r.data;}
+  renderExploreList(companiesAll);
+}
+function renderExploreList(list){
+  const el=document.getElementById('explore-list');
+  if(!el)return;
+  el.innerHTML=list.length?list.map(c=>companyCard(c)).join(''):'<div class="empty-state" style="padding:40px;text-align:center;color:#6B7280"><p>Aucune entreprise trouvée</p></div>';
+}
+function filterCompanies(){
+  const q=(document.getElementById('explore-search')?.value||'').toLowerCase();
+  const sector=document.getElementById('filter-sector')?.value||'';
+  const city=document.getElementById('filter-city')?.value||'';
+  let r=companiesAll;
+  if(q)r=r.filter(c=>c.name.toLowerCase().includes(q)||(c.services||'').toLowerCase().includes(q));
+  if(sector)r=r.filter(c=>c.sector===sector);
+  if(city)r=r.filter(c=>c.city===city);
+  renderExploreList(r);
+}
+function exploreSector(sector){goTo('explore');setTimeout(()=>{const s=document.getElementById('filter-sector');if(s){s.value=sector;filterCompanies();}},100);}
+function handleSearch(q){if(!q||q.trim().length<2)return;goTo('explore');setTimeout(()=>{const i=document.getElementById('explore-search');if(i){i.value=q;filterCompanies();}},100);}
+
+// ─── FICHE ENTREPRISE ─────────────────────────────────────────────
+async function openCompany(id){
+  goTo('company');
+  let c=companiesAll.find(x=>x.id===id);
+  if(!c){const r=await apiFetch('GET','/companies/'+id);if(r.success)c=r.data;}
+  if(!c)return showToast('Entreprise introuvable','error');
+  const page=document.getElementById('page-company');
+  page.querySelector('.company-detail')?.remove();
+  const div=document.createElement('div');div.className='company-detail';
+  div.style.padding='20px';
+  div.innerHTML=`
+    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,#1E66FF11,#2ED47A11);border-radius:16px;margin-bottom:16px">
+      <div style="font-size:64px;margin-bottom:8px">${c.cover||c.init}</div>
+      <h2 style="font-size:20px;font-weight:800;color:#0D1931">${c.name}</h2>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+        <span style="background:#1E66FF22;color:#1E66FF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${c.sector}</span>
+        <span style="background:#f3f4f6;color:#6B7280;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${c.city}</span>
+      </div>
+      ${c.address?`<div style="margin-top:8px;font-size:12px;color:#6B7280">🏢 ${c.address}</div>`:''}
+    </div>
+    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
+      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Nos Services</h4>
+      <p style="font-size:13px;color:#4B5563;line-height:1.6">${c.services||'Non renseigné'}</p>
+    </div>
+    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px">
+      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Notre Vision</h4>
+      <p style="font-size:13px;color:#4B5563;line-height:1.6">${c.vision||'Non renseigné'}</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" onclick="contactCompany(${c.id})" style="flex:2">✉️ Contacter</button>
+      <button class="btn-outline" onclick="toggleFav(null,${c.id})" style="flex:1">♡ Favori</button>
+    </div>`;
+  page.appendChild(div);
+}
+
+// ─── NEWS ─────────────────────────────────────────────────────────
+async function loadNews(){
+  const feed=document.getElementById('news-feed');if(!feed)return;
+  feed.innerHTML='<div style="padding:20px;text-align:center;color:#6B7280">Chargement…</div>';
+  const r=await apiFetch('GET','/news');
+  if(!r.success){feed.innerHTML=`<p style="color:red;padding:16px">${r.error}</p>`;return;}
+  feed.innerHTML=r.data.map(n=>newsCard(n)).join('');
+  const sb=document.getElementById('sidebar-sectors');
+  if(sb&&!sb.dataset.loaded){const rs=await apiFetch('GET','/sectors');if(rs.success){sb.innerHTML=rs.data.map(s=>`<div class="sidebar-sector-item" onclick="exploreSector('${s.label}')" style="padding:8px;cursor:pointer;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:6px"><span>${s.icon}</span>${s.label}</div>`).join('');sb.dataset.loaded='1';}}
+  const sugg=document.getElementById('suggested-companies');
+  if(sugg&&companiesAll.length>0)sugg.innerHTML=companiesAll.slice(0,3).map(c=>`<div onclick="openCompany(${c.id})" style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-radius:8px"><div style="width:36px;height:36px;border-radius:50%;background:#1E66FF22;display:flex;align-items:center;justify-content:center;font-size:18px">${c.cover||c.init}</div><div><div style="font-size:12px;font-weight:700">${c.name}</div><div style="font-size:11px;color:#6B7280">${c.sector}</div></div></div>`).join('');
+}
+
+async function toggleLike(newsId){
+  const liked=likedNewsIds.includes(newsId);
+  const r=await apiFetch('POST',liked?`/news/${newsId}/unlike`:`/news/${newsId}/like`);
+  if(r.success){
+    if(liked)likedNewsIds=likedNewsIds.filter(x=>x!==newsId);else likedNewsIds.push(newsId);
+    localStorage.setItem('makario_liked',JSON.stringify(likedNewsIds));
+    const btn=document.getElementById('like-btn-'+newsId);
+    const cnt=document.getElementById('likes-count-'+newsId);
+    if(btn){btn.innerHTML=(likedNewsIds.includes(newsId)?'♥':'♡')+' <span id="likes-count-'+newsId+'">'+((r.data?.likes)??parseInt(cnt?.textContent||'0')+(liked?-1:1))+'</span>';btn.style.color=likedNewsIds.includes(newsId)?'#1E66FF':'';}
+  } else if(r.error==='Non authentifié'){showToast('Connectez-vous pour liker','error');goTo('login');}
+}
+
+let _pubImageUrl = null;
+
+function showPublishModal(){
+  if(!token){showToast('Connectez-vous pour publier','error');return goTo('login');}
+  _pubImageUrl=null;
+  let m=document.getElementById('publish-modal');
+  if(!m){m=document.createElement('div');m.id='publish-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:flex-end;justify-content:center';m.addEventListener('click',e=>{if(e.target===m)m.remove();});document.body.appendChild(m);}
+  m.innerHTML=`<div style="background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:24px;max-height:90vh;overflow-y:auto">
+    <h3 style="margin-bottom:16px;font-size:18px">Nouvelle publication</h3>
+    <input id="pub-title" placeholder="Titre de votre publication…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:14px;box-sizing:border-box"/>
+    <textarea id="pub-body" placeholder="Décrivez votre offre, actualité…" rows="4" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+    <div id="pub-img-preview" style="display:none;margin-bottom:10px;border-radius:12px;overflow:hidden;position:relative">
+      <img id="pub-img-tag" style="width:100%;max-height:180px;object-fit:cover;display:block"/>
+      <button onclick="_pubImageUrl=null;document.getElementById('pub-img-preview').style.display='none'" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <button onclick="_selectPubImage()" style="width:100%;border:1.5px dashed #d1d5db;border-radius:10px;padding:12px;background:#f9fafb;cursor:pointer;color:#6B7280;font-size:13px;margin-bottom:14px">📷 Ajouter une image</button>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('publish-modal').remove()" style="flex:1;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer">Annuler</button>
+      <button onclick="submitPost()" style="flex:2;padding:12px;background:#1E66FF;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">📢 Publier</button>
+    </div>
+  </div>`;
+}
+
+function _selectPubImage(){
+  const input=document.createElement('input');input.type='file';input.accept='image/*';
+  input.onchange=async()=>{
+    const file=input.files[0];if(!file)return;
+    if(file.size>5*1024*1024)return showToast('Image trop grande (max 5 Mo)','error');
+    showToast('Upload en cours…');
+    const fd=new FormData();fd.append('file',file);
+    const r=await apiUpload(fd);
+    if(r.success){
+      _pubImageUrl=r.data.demo?r.data.url:(SOCKET_URL+r.data.url);
+      const prev=document.getElementById('pub-img-preview');
+      const img=document.getElementById('pub-img-tag');
+      if(prev&&img){img.src=_pubImageUrl;prev.style.display='block';}
+      showToast('Image ajoutée !','success');
+    } else showToast(r.error||'Erreur upload','error');
+  };
+  input.click();
+}
+
+async function submitPost(){
+  const title=document.getElementById('pub-title')?.value.trim();
+  const body=document.getElementById('pub-body')?.value.trim();
+  if(!title||!body)return showToast('Titre et contenu requis','error');
+  const r=await apiFetch('POST','/news',{title,body,emoji:'📢',image:_pubImageUrl||undefined});
+  if(r.success){showToast('Publication ajoutée !','success');document.getElementById('publish-modal')?.remove();_pubImageUrl=null;loadNews();}
+  else showToast(r.error||'Erreur','error');
+}
+
+// ─── MESSAGES ─────────────────────────────────────────────────────
+async function loadMessages(){
+  const list=document.getElementById('conv-list-inner');if(!list)return;
+  if(!token){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#6B7280;margin-bottom:12px">Connectez-vous pour accéder à vos messages</p><button class="btn-primary sm" onclick="goTo('login')">Se connecter</button></div>`;return;}
+  list.innerHTML='<div style="padding:20px;text-align:center;color:#6B7280">Chargement…</div>';
+  const r=await apiFetch('GET','/conversations');
+  if(!r.success||r.data.length===0){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#6B7280;margin-bottom:12px">Pas encore de conversations</p><button class="btn-outline sm" onclick="goTo('explore')">Trouver des entreprises</button></div>`;return;}
+  list.innerHTML=r.data.map(c=>`<div class="conv-item" onclick="openConv(${c.id},'${c.name}','${c.init||c.name?.slice(0,2)||'?'}')">
+    <div class="ci-avatar">${c.init||c.name?.slice(0,2)||'?'}</div>
+    <div class="ci-body"><div class="ci-top"><strong>${c.name||'Conversation'}</strong><span class="ci-time">${c.time||''}</span></div>
+    <div class="ci-preview">${c.preview||'Démarrer la conversation'}</div></div>
+    ${c.unread?`<div class="ci-badge">${c.unread}</div>`:''}
+  </div>`).join('');
+}
+
+async function openConv(convId,name,initials){
+  if(socket){if(currentConvId)socket.emit('leave_conv',currentConvId);socket.emit('join_conv',convId);}
+  currentConvId=convId;
+  const win=document.getElementById('chat-window');if(!win)return;
+  win.innerHTML=`
+    <div class="chat-header" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f3f4f6">
+      <button onclick="currentConvId=null" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:18px">←</button>
+      <div style="width:36px;height:36px;border-radius:50%;background:#1E66FF;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">${initials}</div>
+      <strong style="font-size:14px">${name}</strong>
+    </div>
+    <div class="chat-messages" id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="text-align:center;color:#6B7280">Chargement…</div></div>
+    <div class="chat-input-bar" style="display:flex;gap:8px;padding:12px;border-top:1px solid #f3f4f6">
+      <input id="chat-input" placeholder="Écrire un message…" onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1;border:1px solid #e5e7eb;border-radius:24px;padding:10px 16px;font-size:14px"/>
+      <button onclick="sendMessage()" style="width:40px;height:40px;border-radius:50%;background:#1E66FF;border:none;cursor:pointer;color:#fff;font-size:18px">➤</button>
+    </div>`;
+  const r=await apiFetch('GET',`/conversations/${convId}/messages`);
+  const msgs=document.getElementById('chat-messages');if(!msgs)return;
+  msgs.innerHTML=r.success&&r.data.length>0?r.data.map(m=>`<div style="align-self:${m.sent?'flex-end':'flex-start'};max-width:75%">
+    <div style="background:${m.sent?'#1E66FF':'#f3f4f6'};color:${m.sent?'#fff':'#0D1931'};padding:10px 14px;border-radius:${m.sent?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:14px">${m.text}</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:3px;text-align:${m.sent?'right':'left'}">${formatTime(m.date)}</div>
+  </div>`).join(''):'<div style="text-align:center;color:#6B7280;padding:20px">Démarrez la conversation !</div>';
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function sendMessage(){
+  const input=document.getElementById('chat-input');if(!input||!currentConvId)return;
+  const text=input.value.trim();if(!text)return;input.value='';
+  const r=await apiFetch('POST',`/conversations/${currentConvId}/messages`,{text});
+  if(r.success){const msgs=document.getElementById('chat-messages');if(msgs){const b=document.createElement('div');b.style.cssText='align-self:flex-end;max-width:75%';b.innerHTML=`<div style="background:#1E66FF;color:#fff;padding:10px 14px;border-radius:18px 18px 4px 18px;font-size:14px">${text}</div><div style="font-size:10px;color:#9CA3AF;margin-top:3px;text-align:right">À l'instant</div>`;msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;}}
+  else showToast(r.error||'Erreur','error');
+}
+
+async function contactCompany(companyId){
+  if(!token){showToast('Connectez-vous pour contacter','error');return goTo('login');}
+  const c=companiesAll.find(x=>x.id===companyId);
+  const r=await apiFetch('POST','/conversations',{recipientId:c?.ownerId||99,companyId});
+  if(r.success){goTo('messages');setTimeout(()=>openConv(r.data.id,c?.name||'Entreprise',c?.init||'?'),300);}
+  else showToast(r.error||'Erreur','error');
+}
+
+// ─── FAVORIS ──────────────────────────────────────────────────────
+async function loadFavorites(){
+  const list=document.getElementById('favorites-list');const empty=document.getElementById('favorites-empty');if(!list)return;
+  if(!token){list.innerHTML='';if(empty){empty.classList.remove('hidden');empty.querySelector('p').textContent='Connectez-vous pour voir vos favoris';}return;}
+  const r=await apiFetch('GET','/favorites');
+  if(r.success&&r.data.length>0){list.innerHTML=r.data.map(c=>companyCard(c)).join('');if(empty)empty.classList.add('hidden');}
+  else{list.innerHTML='';if(empty)empty.classList.remove('hidden');}
+}
+
+async function toggleFav(event,companyId){
+  if(event)event.stopPropagation();
+  if(!token){showToast('Connectez-vous pour sauvegarder','error');return goTo('login');}
+  const r=await apiFetch('POST','/favorites/'+companyId);
+  if(r.success){showToast('Ajouté aux favoris ♡','success');const btn=document.querySelector(`.fav-btn[data-company-id="${companyId}"]`);if(btn){btn.style.color='#EF4444';btn.textContent='♥';}}
+  else if(r.error==='Déjà en favoris'){const r2=await apiFetch('DELETE','/favorites/'+companyId);if(r2.success){showToast('Retiré des favoris');const btn=document.querySelector(`.fav-btn[data-company-id="${companyId}"]`);if(btn){btn.style.color='';btn.textContent='♡';}if(document.getElementById('page-favorites')?.classList.contains('active'))loadFavorites();}}
+  else showToast(r.error||'Erreur','error');
+}
+
+// ─── PROFIL ───────────────────────────────────────────────────────
+async function loadProfile(){
+  if(!token){showToast('Connectez-vous pour accéder à votre profil','error');return goTo('login');}
+  const r=await apiFetch('GET','/auth/me');if(!r.success)return;
+  currentUser=r.data;
+  // Nom + rôle
+  const nameEl=document.querySelector('.profile-name');
+  const roleEl=document.querySelector('.profile-role');
+  if(nameEl)nameEl.textContent=currentUser.name||'Mon profil';
+  if(roleEl)roleEl.textContent=(currentUser.profession||'Professionnel')+(currentUser.city?' · '+currentUser.city:'');
+  // Avatar
+  setNavAvatar((currentUser.name?.slice(0,1)||'U').toUpperCase());
+  const avatarImg=document.getElementById('profile-avatar-img');
+  if(avatarImg)avatarImg.src='https://ui-avatars.com/api/?name='+encodeURIComponent(currentUser.name||'U')+'&background=1E66FF&color=fff&size=100';
+  // Lignes d'infos
+  document.querySelectorAll('#page-profile .info-row').forEach(row=>{
+    const lbl=(row.querySelector('label')?.textContent||'').toLowerCase();
+    const val=row.querySelector('span');if(!val)return;
+    if(lbl==='nom')val.textContent=currentUser.name?.split(' ').slice(1).join(' ')||currentUser.name||'—';
+    if(lbl==='prénom')val.textContent=currentUser.name?.split(' ')[0]||'—';
+    if(lbl==='email')val.textContent=currentUser.email||'—';
+    if(lbl==='profession')val.textContent=currentUser.profession||'—';
+    if(lbl==='ville')val.textContent=currentUser.city||'—';
+  });
+  // Bouton déconnexion
+  if(!document.getElementById('logout-btn')){
+    const btn=document.createElement('button');btn.id='logout-btn';btn.className='btn-outline mt';
+    btn.style.cssText='margin-top:12px;width:100%;color:#EF4444;border-color:#EF4444';
+    btn.textContent='🔓 Déconnexion';btn.onclick=logout;
+    const card=document.querySelector('#page-profile .profile-card');if(card)card.appendChild(btn);
+  }
+}
+
+function logout(){
+  if(socket){socket.disconnect();socket=null;}
+  token=null;currentUser=null;
+  localStorage.removeItem('makario_token');localStorage.removeItem('makario_user');
+  showToast('Déconnecté');setNavAvatar('M');document.getElementById('logout-btn')?.remove();goTo('home');
+}
+
+function triggerAvatarUpload(){
+  if(!token){showToast('Connectez-vous d\'abord','error');return;}
+  const input=document.createElement('input');
+  input.type='file';input.accept='image/*';
+  input.onchange=async()=>{
+    const file=input.files[0];if(!file)return;
+    if(file.size>5*1024*1024)return showToast('Image trop grande (max 5 Mo)','error');
+    showToast('Upload en cours…');
+    const fd=new FormData();fd.append('file',file);
+    const r=await apiUpload(fd);
+    if(r.success){
+      const avatarImg=document.getElementById('profile-avatar-img');
+      const url=r.data.demo?r.data.url:(SOCKET_URL+r.data.url);
+      if(avatarImg)avatarImg.src=url;
+      await apiFetch('PUT','/auth/profile',{avatar:r.data.demo?null:r.data.url});
+      showToast('Photo de profil mise à jour !','success');
+    } else showToast(r.error||'Erreur upload','error');
+  };
+  input.click();
+}
+
+function showEditProfileModal(){
+  if(!token){showToast('Connectez-vous','error');return goTo('login');}
+  let m=document.getElementById('edit-profile-modal');
+  if(!m){m=document.createElement('div');m.id='edit-profile-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:flex-end;justify-content:center';m.addEventListener('click',e=>{if(e.target===m)m.remove();});document.body.appendChild(m);}
+  const u=currentUser||{};
+  const parts=(u.name||'').split(' ');
+  const fn=parts[0]||'';const ln=parts.slice(1).join(' ')||'';
+  m.innerHTML=`<div style="background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:24px">
+    <h3 style="margin-bottom:16px;font-size:18px">Modifier le profil</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">PRÉNOM</label><input id="ep-firstname" value="${fn}" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NOM</label><input id="ep-lastname" value="${ln}" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+    </div>
+    <div style="margin-bottom:10px"><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">PROFESSION</label><input id="ep-profession" value="${u.profession||''}" placeholder="Chef d'entreprise, Développeur…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+    <div style="margin-bottom:16px"><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">VILLE</label>
+      <select id="ep-city" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box">
+        <option value="">Sélectionner</option>
+        <option${u.city==='Brazzaville'?' selected':''}>Brazzaville</option>
+        <option${u.city==='Pointe-Noire'?' selected':''}>Pointe-Noire</option>
+        <option${u.city==='Dolisie'?' selected':''}>Dolisie</option>
+        <option${u.city==='Ouesso'?' selected':''}>Ouesso</option>
+        <option${u.city==='Paris'?' selected':''}>Paris</option>
+        <option${u.city==='Montréal'?' selected':''}>Montréal</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('edit-profile-modal').remove()" style="flex:1;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer">Annuler</button>
+      <button onclick="saveProfile()" style="flex:2;padding:12px;background:#1E66FF;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Enregistrer</button>
+    </div>
+  </div>`;
+}
+
+async function saveProfile(){
+  const fn=document.getElementById('ep-firstname')?.value.trim();
+  const ln=document.getElementById('ep-lastname')?.value.trim();
+  const name=[fn,ln].filter(Boolean).join(' ');
+  const profession=document.getElementById('ep-profession')?.value.trim();
+  const city=document.getElementById('ep-city')?.value;
+  if(!name)return showToast('Le nom est requis','error');
+  const r=await apiFetch('PUT','/auth/profile',{name,profession,city});
+  if(r.success){
+    currentUser=r.data;localStorage.setItem('makario_user',JSON.stringify(currentUser));
+    showToast('Profil mis à jour !','success');
+    document.getElementById('edit-profile-modal')?.remove();
+    loadProfile();
+  } else showToast(r.error||'Erreur','error');
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────
+async function loadDashboard(){
+  if(!token){showToast('Connectez-vous','error');return goTo('login');}
+  const rs=await apiFetch('GET','/stats');
+  if(rs.success){const s=rs.data;document.querySelectorAll('#page-dashboard .dash-stat').forEach((el,i)=>{const vals=[s.totalCompanies,s.totalUsers,s.totalNews,s.totalSectors];const n=el.querySelector('.stat-num,.dash-val');if(n&&vals[i]!==undefined)n.textContent=vals[i];});}
+  const rNews=await apiFetch('GET','/news');
+  const pubFeed=document.getElementById('dashboard-posts');
+  if(pubFeed&&rNews.success)pubFeed.innerHTML=rNews.data.slice(0,3).map(n=>`<div style="padding:10px 0;border-bottom:1px solid #f3f4f6"><div style="font-weight:600;font-size:13px">${n.title}</div><div style="font-size:11px;color:#6B7280;margin-top:3px">${formatTime(n.date)} · ♥ ${n.likes}</div></div>`).join('')||'<p style="color:#6B7280">Aucune publication</p>';
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────
+let authStep=1,authTab='personal';
+function switchAuthTab(tab){authTab=tab;}
+function nextStep(){const s=document.querySelectorAll('#page-register .form-step');if(authStep<s.length){s[authStep-1].classList.remove('active');authStep++;s[authStep-1].classList.add('active');_updateStepDots();}}
+function prevStep(){const s=document.querySelectorAll('#page-register .form-step');if(authStep>1){s[authStep-1].classList.remove('active');authStep--;s[authStep-1].classList.add('active');_updateStepDots();}}
+function _updateStepDots(){document.querySelectorAll('#page-register .step').forEach((el,i)=>{el.classList.toggle('active',i<authStep);});}
+
+async function completeRegister(){
+  const firstname=(document.getElementById('reg-firstname')?.value||'').trim();
+  const lastname=(document.getElementById('reg-lastname')?.value||'').trim();
+  const name=[firstname,lastname].filter(Boolean).join(' ');
+  const email=document.getElementById('reg-email')?.value?.trim();
+  const password=document.getElementById('reg-password')?.value;
+  if(!name||!email||!password)return showToast('Tous les champs sont requis','error');
+  if(password.length<6)return showToast('Mot de passe : 6 caractères min','error');
+  const confirm=document.getElementById('reg-confirm')?.value;
+  if(confirm&&confirm!==password)return showToast('Les mots de passe ne correspondent pas','error');
+  const body={name,email,password};
+  if(authTab==='company')body.company={name:document.getElementById('comp-name')?.value?.trim(),sector:document.getElementById('comp-sector')?.value,city:document.getElementById('comp-city')?.value,services:document.getElementById('comp-services')?.value?.trim()};
+  const r=await apiFetch('POST','/auth/register',body);
+  if(r.success){token=r.data.token;currentUser=r.data.user;localStorage.setItem('makario_token',token);localStorage.setItem('makario_user',JSON.stringify(currentUser));showToast(`Bienvenue, ${currentUser.name} ! 🎉`,'success');authStep=1;connectSocket();goTo('home');setNavAvatar((currentUser.name?.slice(0,1)||'U').toUpperCase());}
+  else showToast(r.error||'Erreur inscription','error');
+}
+
+async function completeLogin(){
+  const email=document.getElementById('login-email')?.value?.trim();
+  const password=document.getElementById('login-password')?.value;
+  if(!email||!password)return showToast('Email et mot de passe requis','error');
+  const r=await apiFetch('POST','/auth/login',{email,password});
+  if(r.success){token=r.data.token;currentUser=r.data.user;localStorage.setItem('makario_token',token);localStorage.setItem('makario_user',JSON.stringify(currentUser));showToast(`Bon retour, ${currentUser.name} ! 👋`,'success');connectSocket();goTo('home');setNavAvatar((currentUser.name?.slice(0,1)||'U').toUpperCase());}
+  else showToast(r.error||'Email ou mot de passe incorrect','error');
+}
+
+// ─── SYSTÈME DE PAIEMENT COMPLET ──────────────────────────────────
+
+function showPayModal(plan, price) {
+  if (!token) { showToast('Connectez-vous pour vous abonner', 'error'); return goTo('login'); }
+  let m = document.getElementById('pay-modal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'pay-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(13,25,49,.7);z-index:2000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)';
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  }
+  m.innerHTML = `
+  <div style="background:#fff;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:0;overflow:hidden;max-height:92vh;overflow-y:auto">
+    <!-- En-tête -->
+    <div style="background:linear-gradient(135deg,#1E66FF,#2ED47A);padding:24px 24px 20px;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:12px;opacity:.8;font-weight:600;letter-spacing:.5px;text-transform:uppercase">Abonnement</div>
+          <div style="font-size:24px;font-weight:800;margin-top:2px">${plan}</div>
+        </div>
+        <button onclick="document.getElementById('pay-modal').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div style="margin-top:12px;background:rgba(255,255,255,.15);border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;opacity:.9">Montant total</span>
+        <span style="font-size:20px;font-weight:800">${price} FCFA</span>
+      </div>
+    </div>
+
+    <div style="padding:20px 20px 32px">
+      <!-- Sécurité -->
+      <div style="display:flex;align-items:center;gap:6px;color:#6B7280;font-size:11px;margin-bottom:20px;justify-content:center">
+        🔒 <span>Paiement 100% sécurisé · SSL 256 bits · Données cryptées</span>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#0D1931;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Choisissez votre mode de paiement</div>
+
+      <!-- ══ CARTES BANCAIRES ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="togglePaySection('card-section')" style="width:100%;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+          <div style="display:flex;gap:4px;align-items:center">
+            <div style="background:#1A1F71;color:#fff;font-size:9px;font-weight:900;padding:3px 6px;border-radius:4px;letter-spacing:.5px">VISA</div>
+            <div style="background:#EB001B;color:#fff;font-size:9px;font-weight:900;padding:3px 6px;border-radius:4px;position:relative">
+              <span style="position:absolute;left:-4px;top:0;width:12px;height:100%;background:#FF5F00;border-radius:2px"></span>
+              <span style="position:relative">MC</span>
+            </div>
+            <div style="background:#2E77BC;color:#fff;font-size:9px;font-weight:800;padding:3px 5px;border-radius:4px">AMEX</div>
+          </div>
+          <span style="flex:1">Carte bancaire</span>
+          <span style="font-size:18px;transition:transform .2s" id="chevron-card">▾</span>
+        </button>
+        <div id="card-section" style="display:none;background:#fff;border:1.5px solid #1E66FF33;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <div style="display:grid;gap:10px">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO DE CARTE</label>
+              <input id="card-num" type="text" placeholder="1234 5678 9012 3456" maxlength="19"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/(.{4})/g,'$1 ').trim()"
+                style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:15px;box-sizing:border-box;letter-spacing:1px;font-family:monospace"/>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NOM SUR LA CARTE</label>
+              <input id="card-name" type="text" placeholder="FELIX NGOMA" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;text-transform:uppercase"/>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">EXPIRATION</label>
+                <input id="card-exp" type="text" placeholder="MM/AA" maxlength="5"
+                  oninput="let v=this.value.replace(/\D/g,'');if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2);this.value=v"
+                  style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;font-family:monospace"/>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">CVV</label>
+                <input id="card-cvv" type="password" placeholder="•••" maxlength="4" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;font-family:monospace"/>
+              </div>
+            </div>
+            <button onclick="processCardPayment('${plan}','${price}')" style="width:100%;background:linear-gradient(135deg,#1E66FF,#1555CC);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px">
+              💳 Payer ${price} FCFA
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAYPAL ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="processPayPal('${plan}','${price}')" style="width:100%;background:#FFC439;border:1.5px solid #F0B930;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font-weight:800;color:#003087;font-size:15px">
+          <span style="font-size:20px">🅿️</span>
+          <span style="font-family:system-ui;letter-spacing:-.3px"><span style="color:#009cde">Pay</span><span style="color:#003087">Pal</span></span>
+          <span style="flex:1;text-align:right;font-size:12px;font-weight:600;color:#003087;opacity:.7">Payer en un clic</span>
+        </button>
+      </div>
+
+      <!-- ══ GOOGLE PAY / APPLE PAY ══ -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <button onclick="processGooglePay('${plan}','${price}')" style="background:#fff;border:1.5px solid #e5e7eb;border-radius:14px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:#0D1931">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google Pay
+        </button>
+        <button onclick="processApplePay('${plan}','${price}')" style="background:#000;border:1.5px solid #000;border-radius:14px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:#fff">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.2 1.28-2.18 3.81.03 3.02 2.65 4.03 2.68 4.04l-.05.17zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple Pay
+        </button>
+      </div>
+
+      <!-- ══ SÉPARATEUR ══ -->
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+        <span style="font-size:11px;color:#9CA3AF;font-weight:600">MOBILE MONEY AFRIQUE</span>
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+      </div>
+
+      <!-- ══ MTN MOBILE MONEY ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="togglePaySection('mtn-section')" style="width:100%;background:#FFF8E1;border:1.5px solid #FFD54F;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+          <div style="width:32px;height:32px;background:#FFCC00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#0D1931">MTN</div>
+          <span style="flex:1">MTN Mobile Money</span>
+          <span style="font-size:11px;color:#6B7280">CG · CD · CM · CI · GH…</span>
+          <span id="chevron-mtn" style="font-size:18px">▾</span>
+        </button>
+        <div id="mtn-section" style="display:none;background:#FFFDF0;border:1.5px solid #FFD54F;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO MTN MOBILE MONEY</label>
+          <div style="display:flex;gap:8px">
+            <div style="background:#e5e7eb;border-radius:10px;padding:11px 12px;font-size:13px;font-weight:700;white-space:nowrap">🇨🇬 +242</div>
+            <input id="mtn-num" type="tel" placeholder="06 XXX XX XX" style="flex:1;border:1.5px solid #FFD54F;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
+          </div>
+          <button onclick="processMobileMoney('MTN','${plan}','${price}')" style="width:100%;background:#FFCC00;color:#0D1931;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px">
+            📱 Payer via MTN MoMo
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ AIRTEL MONEY ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="togglePaySection('airtel-section')" style="width:100%;background:#FFF0F0;border:1.5px solid #FF8A80;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+          <div style="width:32px;height:32px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;color:#fff">AIR</div>
+          <span style="flex:1">Airtel Money</span>
+          <span style="font-size:11px;color:#6B7280">CG · CD · RW · ZM…</span>
+          <span id="chevron-airtel" style="font-size:18px">▾</span>
+        </button>
+        <div id="airtel-section" style="display:none;background:#FFF8F8;border:1.5px solid #FF8A80;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO AIRTEL MONEY</label>
+          <div style="display:flex;gap:8px">
+            <div style="background:#e5e7eb;border-radius:10px;padding:11px 12px;font-size:13px;font-weight:700;white-space:nowrap">🇨🇬 +242</div>
+            <input id="airtel-num" type="tel" placeholder="05 XXX XX XX" style="flex:1;border:1.5px solid #FF8A80;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
+          </div>
+          <button onclick="processMobileMoney('Airtel','${plan}','${price}')" style="width:100%;background:#FF0000;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px">
+            📲 Payer via Airtel Money
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ ORANGE MONEY ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="togglePaySection('orange-section')" style="width:100%;background:#FFF3E0;border:1.5px solid #FFAB40;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+          <div style="width:32px;height:32px;background:#FF6600;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff">◉</div>
+          <span style="flex:1">Orange Money</span>
+          <span style="font-size:11px;color:#6B7280">SN · CI · CM · ML…</span>
+          <span id="chevron-orange" style="font-size:18px">▾</span>
+        </button>
+        <div id="orange-section" style="display:none;background:#FFFBF5;border:1.5px solid #FFAB40;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO ORANGE MONEY</label>
+          <div style="display:flex;gap:8px">
+            <select id="orange-country" style="background:#e5e7eb;border:none;border-radius:10px;padding:11px 10px;font-size:12px;font-weight:700">
+              <option value="+221">🇸🇳 +221</option>
+              <option value="+225">🇨🇮 +225</option>
+              <option value="+237">🇨🇲 +237</option>
+              <option value="+223">🇲🇱 +223</option>
+              <option value="+224">🇬🇳 +224</option>
+            </select>
+            <input id="orange-num" type="tel" placeholder="7X XXX XX XX" style="flex:1;border:1.5px solid #FFAB40;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
+          </div>
+          <button onclick="processMobileMoney('Orange','${plan}','${price}')" style="width:100%;background:#FF6600;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px">
+            🟠 Payer via Orange Money
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ WAVE ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="processMobileMoney('Wave','${plan}','${price}')" style="width:100%;background:#E8F4FD;border:1.5px solid #29B6F6;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font-weight:700;color:#0D1931;font-size:14px">
+          <div style="width:32px;height:32px;background:#00B4FF;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff">〜</div>
+          <span style="flex:1">Wave</span>
+          <span style="font-size:11px;color:#6B7280">SN · CI · BF · ML · UG…</span>
+        </button>
+      </div>
+
+      <!-- ══ SÉPARATEUR ══ -->
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+        <span style="font-size:11px;color:#9CA3AF;font-weight:600">AUTRES</span>
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+      </div>
+
+      <!-- ══ VIREMENT BANCAIRE ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="togglePaySection('wire-section')" style="width:100%;background:#F0F4FF;border:1.5px solid #A5B4FC;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+          <span style="font-size:22px">🏦</span>
+          <span style="flex:1">Virement bancaire</span>
+          <span id="chevron-wire" style="font-size:18px">▾</span>
+        </button>
+        <div id="wire-section" style="display:none;background:#F8F9FF;border:1.5px solid #A5B4FC;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <div style="background:#EEF2FF;border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:#0D1931">
+            <div><strong>Banque :</strong> BGFI Bank Congo</div>
+            <div><strong>IBAN :</strong> CG 86 0001 0000 1234 5678 9012 345</div>
+            <div><strong>BIC :</strong> BGFICGCG</div>
+            <div><strong>Bénéficiaire :</strong> MAKARIO SAS</div>
+            <div style="margin-top:8px;font-weight:700;color:#1E66FF"><strong>Référence :</strong> MAK-${plan.toUpperCase()}-${Date.now().toString().slice(-6)}</div>
+          </div>
+          <div style="font-size:11px;color:#6B7280;margin-top:10px;line-height:1.6">⚠️ Votre abonnement sera activé sous 24–48h après réception du virement. Envoyez votre preuve de paiement à <strong>paiements@makario.cg</strong></div>
+          <button onclick="copyWireRef()" style="width:100%;background:#1E66FF;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px">
+            📋 Copier la référence
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ CRYPTO ══ -->
+      <div style="margin-bottom:8px">
+        <button onclick="togglePaySection('crypto-section')" style="width:100%;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+          <span style="font-size:22px">₿</span>
+          <span style="flex:1">Crypto-monnaies</span>
+          <span style="font-size:11px;color:#6B7280">BTC · ETH · USDT</span>
+          <span id="chevron-crypto" style="font-size:18px">▾</span>
+        </button>
+        <div id="crypto-section" style="display:none;background:#FAFAFF;border:1.5px solid #DDD6FE;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <div style="display:grid;gap:8px">
+            <button onclick="processCrypto('Bitcoin','${plan}')" style="background:#FFF8E1;border:1.5px solid #FFC107;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#0D1931">
+              <span style="font-size:22px">₿</span><div style="text-align:left"><div style="font-size:13px">Bitcoin (BTC)</div><div style="font-size:11px;color:#6B7280;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/900000).toFixed(5)} BTC</div></div>
+            </button>
+            <button onclick="processCrypto('Ethereum','${plan}')" style="background:#F0F0FF;border:1.5px solid #9C9FE4;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#0D1931">
+              <span style="font-size:22px">Ξ</span><div style="text-align:left"><div style="font-size:13px">Ethereum (ETH)</div><div style="font-size:11px;color:#6B7280;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/1500000).toFixed(4)} ETH</div></div>
+            </button>
+            <button onclick="processCrypto('USDT','${plan}')" style="background:#F0FFF4;border:1.5px solid #26A17B;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#0D1931">
+              <span style="font-size:22px">₮</span><div style="text-align:left"><div style="font-size:13px">Tether (USDT)</div><div style="font-size:11px;color:#6B7280;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/600).toFixed(2)} USDT</div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function togglePaySection(id) {
+  const all = ['card-section','mtn-section','airtel-section','orange-section','wire-section','crypto-section'];
+  all.forEach(sid => {
+    const el = document.getElementById(sid);
+    const chevId = 'chevron-' + sid.replace('-section','');
+    const chev = document.getElementById(chevId);
+    if (sid === id) {
+      const isOpen = el && el.style.display !== 'none';
+      if (el) el.style.display = isOpen ? 'none' : 'block';
+      if (chev) chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+    } else {
+      if (el) el.style.display = 'none';
+      if (chev) chev.style.transform = '';
+    }
+  });
+}
+
+function processCardPayment(plan, price) {
+  const num = document.getElementById('card-num')?.value.replace(/\s/g,'');
+  const name = document.getElementById('card-name')?.value.trim();
+  const exp = document.getElementById('card-exp')?.value.trim();
+  const cvv = document.getElementById('card-cvv')?.value.trim();
+  if (!num || num.length < 15) return showToast('Numéro de carte invalide', 'error');
+  if (!name) return showToast('Nom sur la carte requis', 'error');
+  if (!exp || exp.length < 4) return showToast('Date d\'expiration invalide', 'error');
+  if (!cvv || cvv.length < 3) return showToast('CVV invalide', 'error');
+  showPaymentProcessing(plan, price, '💳 Carte bancaire');
+}
+
+function processPayPal(plan, price) {
+  showPaymentProcessing(plan, price, '🅿️ PayPal');
+}
+
+function processGooglePay(plan, price) {
+  showPaymentProcessing(plan, price, '📱 Google Pay');
+}
+
+function processApplePay(plan, price) {
+  showPaymentProcessing(plan, price, '🍎 Apple Pay');
+}
+
+function processMobileMoney(provider, plan, price) {
+  let num = '';
+  if (provider === 'MTN') num = document.getElementById('mtn-num')?.value.trim();
+  else if (provider === 'Airtel') num = document.getElementById('airtel-num')?.value.trim();
+  else if (provider === 'Orange') num = document.getElementById('orange-num')?.value.trim();
+  if (['MTN','Airtel','Orange'].includes(provider) && !num) {
+    return showToast('Entrez votre numéro ' + provider, 'error');
+  }
+  showPaymentProcessing(plan, price, '📱 ' + provider + (num ? ' · ' + num : ''));
+}
+
+function processCrypto(coin, plan) {
+  showPaymentProcessing(plan, '—', '₿ ' + coin);
+}
+
+function copyWireRef() {
+  const ref = 'MAK-' + document.querySelector('#wire-section strong:last-child')?.textContent || 'MAK-REF';
+  navigator.clipboard?.writeText(ref).catch(()=>{});
+  showToast('Référence copiée !', 'success');
+}
+
+function showPaymentProcessing(plan, price, method) {
+  const m = document.getElementById('pay-modal');
+  if (m) m.innerHTML = `
+  <div style="background:#fff;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:48px 28px;text-align:center">
+    <div style="font-size:64px;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <h3 style="font-size:20px;font-weight:800;color:#0D1931;margin-bottom:8px">Traitement en cours…</h3>
+    <p style="color:#6B7280;font-size:14px;margin-bottom:4px">Méthode : <strong>${method}</strong></p>
+    <p style="color:#6B7280;font-size:13px">Ne fermez pas cette page</p>
+  </div>`;
+  setTimeout(async () => {
+    // Sauvegarder l'abonnement en base
+    await apiFetch('POST', '/subscriptions', { plan, method, price });
+    if (m) m.innerHTML = `
+    <div style="background:#fff;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:48px 28px;text-align:center">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,#2ED47A,#1E66FF);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px">✓</div>
+      <h3 style="font-size:22px;font-weight:800;color:#0D1931;margin-bottom:8px">Paiement confirmé ! 🎉</h3>
+      <p style="color:#6B7280;font-size:14px;margin-bottom:4px">Abonnement <strong>${plan}</strong> activé</p>
+      <p style="color:#6B7280;font-size:13px;margin-bottom:24px">Via ${method}</p>
+      <div style="background:#F0FFF7;border-radius:12px;padding:14px;margin-bottom:24px;font-size:13px;color:#065F46">
+        ✅ Votre compte a été mis à niveau<br/>✅ Confirmation envoyée par email<br/>✅ Avantages actifs immédiatement
+      </div>
+      <button onclick="document.getElementById('pay-modal').remove();showToast('Bienvenue dans le plan ${plan} !','success')"
+        style="width:100%;background:linear-gradient(135deg,#1E66FF,#2ED47A);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:800;cursor:pointer">
+        Accéder à mon espace →
+      </button>
+    </div>`;
+  }, 2200);
+}
+
+function toggleThis(el){el.classList.toggle('active');}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+function setNavAvatar(text){const el=document.getElementById('nav-avatar-init');if(el)el.textContent=text;}
+
+function connectSocket(){
+  if(!token||!window.io||USE_MOCK)return;
+  if(socket){socket.disconnect();}
+  socket=window.io(SOCKET_URL,{auth:{token}});
+  socket.on('new_message',(msg)=>{
+    // Si la conversation est ouverte, ajouter le message en temps réel
+    if(currentConvId===msg.conversationId&&msg.senderId!==currentUser?.id){
+      const msgs=document.getElementById('chat-messages');
+      if(msgs){
+        const b=document.createElement('div');
+        b.style.cssText='align-self:flex-start;max-width:75%';
+        b.innerHTML=`<div style="background:#f3f4f6;color:#0D1931;padding:10px 14px;border-radius:18px 18px 18px 4px;font-size:14px">${msg.text}</div><div style="font-size:10px;color:#9CA3AF;margin-top:3px">À l'instant</div>`;
+        msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;
+      }
+    }
+    // Recharger la liste de conversations pour mettre à jour le preview
+    if(document.getElementById('page-messages')?.classList.contains('active'))loadMessages();
+  });
+  socket.on('connect_error',(e)=>console.warn('Socket erreur:',e.message));
+}
+
+async function init(){
+  // Tester connexion backend
+  try {
+    const res = await fetch(API_URL+'/health',{signal:AbortSignal.timeout(2000)});
+    const data = await res.json();
+    USE_MOCK = !data.success;
+    if(!USE_MOCK) console.log('✅ Backend Makario connecté sur localhost:3000');
+  } catch {
+    USE_MOCK = true;
+    console.log('ℹ️ Backend absent → Mode démo actif (localStorage)');
+  }
+
+  // Afficher l'app, masquer le splash
+  const splash=document.getElementById('splash');
+  const appEl=document.getElementById('app');
+  if(splash){splash.classList.add('fade-out');setTimeout(()=>{splash.style.display='none';},500);}
+  if(appEl)appEl.classList.remove('hidden');
+
+  if(token){
+    const r=await apiFetch('GET','/auth/me');
+    if(r.success){currentUser=r.data;setNavAvatar((currentUser.name?.slice(0,1)||'U').toUpperCase());connectSocket();}
+    else{token=null;localStorage.removeItem('makario_token');localStorage.removeItem('makario_user');}
+  }
+  await loadHome();
+
+  if(USE_MOCK){
+    // Afficher badge mode démo discret
+    const badge=document.createElement('div');
+    badge.style.cssText='position:fixed;top:8px;right:8px;background:#F59E0B;color:#fff;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;z-index:9998;opacity:.8';
+    badge.textContent='DÉMO';badge.title='Mode démo — données en localStorage';
+    document.body.appendChild(badge);
+  }
+}
+
+document.addEventListener('DOMContentLoaded',init);

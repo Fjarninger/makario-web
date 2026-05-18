@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Makario – Réseau · Marketplace · Messagerie | Plateforme N°1 des Pros au Congo</title>
+  <meta name="description" content="Makario connecte 2400+ entreprises et professionnels au Congo. Annuaire professionnel, publications, messagerie directe. Gratuit pour débuter." />
+  <meta name="keywords" content="makario, entreprises congo, brazzaville, pointe-noire, annuaire professionnel, réseau professionnel, marketplace congo" />
+  <meta name="author" content="Makario" />
+  <meta name="robots" content="index, follow" />
+  <!-- Open Graph -->
+  <meta property="og:title" content="Makario – La Plateforme N°1 des Pros au Congo" />
+  <meta property="og:description" content="Connectez votre entreprise au monde entier. 2400+ entreprises, 12 secteurs, 100% gratuit pour débuter." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://makario.netlify.app" />
+  <meta property="og:locale" content="fr_CG" />
+  <meta property="og:site_name" content="Makario" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Makario – Réseau Professionnel Congo" />
+  <meta name="twitter:description" content="Trouvez des partenaires, publiez vos services, échangez en temps réel." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon-192.svg" />
+  <meta name="theme-color" content="#1E66FF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Makario" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ SPLASH ═══════════════════════════════════ -->
+<div id="splash" class="splash">
+  <div class="splash-inner">
+    <div class="splash-logo">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#1E66FF"/>
+            <stop offset="100%" stop-color="#2ED47A"/>
+          </linearGradient>
+        </defs>
+        <circle cx="32" cy="32" r="32" fill="url(#lg1)"/>
+        <text x="32" y="43" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="26" fill="white">M</text>
+      </svg>
+    </div>
+    <h1 class="splash-title">Makario</h1>
+    <p class="splash-sub">Réseau · Marketplace · Messagerie</p>
+    <div class="splash-loader"><span></span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ APP ═══════════════════════════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- ─── NAVBAR ─── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-left">
+      <button class="nav-brand" onclick="goTo('home')">
+        <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+          <defs>
+            <linearGradient id="lg2" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1E66FF"/>
+              <stop offset="100%" stop-color="#2ED47A"/>
+            </linearGradient>
+          </defs>
+          <circle cx="32" cy="32" r="32" fill="url(#lg2)"/>
+          <text x="32" y="43" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="26" fill="white">M</text>
+        </svg>
+        <span>Makario</span>
+      </button>
+    </div>
+    <div class="nav-search" id="nav-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Rechercher une entreprise, un secteur…" id="global-search" oninput="handleSearch(this.value)" />
+    </div>
+    <div class="nav-right">
+      <button class="nav-notif" onclick="showToast('Aucune nouvelle notification')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="nav-avatar" onclick="goTo('profile')">
+        <div id="nav-avatar-init" style="width:100%;height:100%;background:#1E66FF;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:800;font-size:16px;border-radius:50%">M</div>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── PAGES ─── -->
+  <main class="pages">
+
+    <!-- ══════════ HOME ══════════ -->
+    <section id="page-home" class="page active">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+          <span class="hero-badge">Plateforme N°1 des pros</span>
+          <h2>Connectez votre entreprise<br/>au monde entier</h2>
+          <p>Trouvez des partenaires, publiez vos services, échangez en temps réel</p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="goTo('explore')">Explorer les entreprises</button>
+            <button class="btn-ghost" onclick="goTo('register')">Créer un compte</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-card floating">
+            <div class="hc-logo">
+              <svg width="36" height="36" viewBox="0 0 64 64"><defs><linearGradient id="hclg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1E66FF"/><stop offset="100%" stop-color="#2ED47A"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#hclg)"/><text x="32" y="42" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="22" fill="white">ST</text></svg>
+            </div>
+            <div class="hc-info">
+              <strong>SIGTH-TECH CONGO</strong>
+              <span>Technologies · Brazzaville</span>
+            </div>
+            <span class="hc-badge green">TIC</span>
+          </div>
+          <div class="hero-card floating delay1">
+            <div class="hc-logo">
+              <svg width="36" height="36" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#2ED47A"/><text x="32" y="42" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="22" fill="white">BM</text></svg>
+            </div>
+            <div class="hc-info">
+              <strong>BEST INFORMATIQUE</strong>
+              <span>Informatique · Pointe-Noire</span>
+            </div>
+            <span class="hc-badge blue">TIC</span>
+          </div>
+          <div class="stat-pills">
+            <div class="pill">
+              <strong>2 400+</strong>
+              <span>Entreprises</span>
+            </div>
+            <div class="pill">
+              <strong>12 secteurs</strong>
+              <span>d'activité</span>
+            </div>
+            <div class="pill">
+              <strong>100%</strong>
+              <span>Gratuit pour débuter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="section">
+        <div class="section-header">
+          <h3>Tout ce dont vous avez besoin</h3>
+          <p>Une plateforme unique, trois puissances</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card" onclick="goTo('explore')">
+            <div class="fc-icon" style="background:linear-gradient(135deg,#1E66FF22,#1E66FF44)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E66FF" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </div>
+            <h4>Annuaire Professionnel</h4>
+            <p>Retrouvez les meilleures entreprises par secteur, ville et spécialité</p>
+            <span class="fc-arrow">→</span>
+          </div>
+          <div class="feature-card" onclick="goTo('news')">
+            <div class="fc-icon" style="background:linear-gradient(135deg,#2ED47A22,#2ED47A44)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+            </div>
+            <h4>Actualités & Publications</h4>
+            <p>Publiez vos offres, recrutements et actualités pour toucher vos prospects</p>
+            <span class="fc-arrow">→</span>
+          </div>
+          <div class="feature-card" onclick="goTo('messages')">
+            <div class="fc-icon" style="background:linear-gradient(135deg,#FF6B3522,#FF6B3544)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h4>Messagerie Directe</h4>
+            <p>Échangez en temps réel avec vos partenaires, clients et fournisseurs</p>
+            <span class="fc-arrow">→</span>
+          </div>
+          <div class="feature-card" onclick="goTo('subscription')">
+            <div class="fc-icon" style="background:linear-gradient(135deg,#F7B50022,#F7B50044)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F7B500" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <h4>Abonnements Premium</h4>
+            <p>Boostez votre visibilité avec nos offres Silver, Premium et Gold</p>
+            <span class="fc-arrow">→</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Companies Spotlight -->
+      <div class="section">
+        <div class="section-header">
+          <h3>Entreprises à la une</h3>
+          <button class="link-btn" onclick="goTo('explore')">Voir toutes →</button>
+        </div>
+        <div class="companies-row" id="spotlight-list"></div>
+      </div>
+
+      <!-- Sectors -->
+      <div class="section bg-subtle">
+        <div class="section-header">
+          <h3>Explorer par secteur</h3>
+        </div>
+        <div class="sectors-grid" id="sectors-home"></div>
+      </div>
+
+      <!-- Comment ça marche -->
+      <div class="section">
+        <div class="section-header">
+          <h3>Comment ça marche ?</h3>
+          <p>Simple, rapide et efficace</p>
+        </div>
+        <div class="how-grid">
+          <div class="how-step">
+            <div class="how-num">01</div>
+            <div class="how-icon">🏢</div>
+            <h4>Créez votre profil</h4>
+            <p>Inscrivez votre entreprise en moins de 2 minutes. Gratuit pour commencer.</p>
+          </div>
+          <div class="how-arrow">→</div>
+          <div class="how-step">
+            <div class="how-num">02</div>
+            <div class="how-icon">📢</div>
+            <h4>Publiez vos offres</h4>
+            <p>Partagez vos services, recrutements et actualités avec la communauté.</p>
+          </div>
+          <div class="how-arrow">→</div>
+          <div class="how-step">
+            <div class="how-num">03</div>
+            <div class="how-icon">🤝</div>
+            <h4>Connectez-vous</h4>
+            <p>Échangez directement avec des partenaires, clients et fournisseurs.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Témoignages -->
+      <div class="section bg-subtle">
+        <div class="section-header">
+          <h3>Ce que disent nos membres</h3>
+          <p>Ils nous font confiance</p>
+        </div>
+        <div class="testimonials-grid">
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-text">"Grâce à Makario, j'ai trouvé 3 nouveaux clients en une semaine. La plateforme est intuitive et professionnelle."</p>
+            <div class="testi-author">
+              <div class="testi-avatar" style="background:#1E66FF">ST</div>
+              <div><strong>Serge Tambou</strong><span>Fondateur, SIGTH-TECH CONGO</span></div>
+            </div>
+          </div>
+          <div class="testi-card featured">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-text">"Notre visibilité a doublé depuis que nous sommes sur Makario. L'annuaire professionnel est vraiment efficace pour le marché congolais."</p>
+            <div class="testi-author">
+              <div class="testi-avatar" style="background:#2ED47A">EG</div>
+              <div><strong>Espoir Goma</strong><span>Directeur, EGCM Formation</span></div>
+            </div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-text">"La messagerie directe m'a permis de conclure un partenariat avec une entreprise de Pointe-Noire. C'est révolutionnaire !"</p>
+            <div class="testi-author">
+              <div class="testi-avatar" style="background:#F7B500">AI</div>
+              <div><strong>Aimée Itoua</strong><span>Directrice, AI Communication</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Final -->
+      <div class="section cta-section">
+        <div class="cta-inner">
+          <div class="cta-badge">Rejoignez la communauté</div>
+          <h3>Prêt à développer votre entreprise ?</h3>
+          <p>Rejoignez les 2 400+ entreprises qui font confiance à Makario pour leur visibilité professionnelle.</p>
+          <div class="cta-actions">
+            <button class="btn-primary" onclick="goTo('register')">Créer mon compte gratuitement</button>
+            <button class="btn-outline-dark" onclick="goTo('explore')">Explorer l'annuaire</button>
+          </div>
+          <p class="cta-note">✓ Gratuit pour débuter &nbsp;·&nbsp; ✓ Sans carte bancaire &nbsp;·&nbsp; ✓ En ligne en 2 minutes</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════ EXPLORE ══════════ -->
+    <section id="page-explore" class="page">
+      <div class="page-header">
+        <h2>Explorer</h2>
+        <p>Découvrez toutes les entreprises enregistrées</p>
+      </div>
+      <div class="explore-toolbar">
+        <div class="search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Rechercher…" id="explore-search" oninput="filterCompanies()" />
+        </div>
+        <div class="filter-row">
+          <select id="filter-sector" onchange="filterCompanies()">
+            <option value="">Tous les secteurs</option>
+            <option>TIC</option>
+            <option>Commerce</option>
+            <option>Prestations de services</option>
+            <option>BTP</option>
+            <option>Tourisme & Restauration</option>
+            <option>Culture & Arts</option>
+            <option>Santé</option>
+            <option>Éducation & Formation</option>
+          </select>
+          <select id="filter-city" onchange="filterCompanies()">
+            <option value="">Toutes les villes</option>
+            <option>Brazzaville</option>
+            <option>Pointe-Noire</option>
+            <option>Dolisie</option>
+            <option>Ouesso</option>
+          </select>
+        </div>
+      </div>
+      <div class="companies-grid" id="explore-list"></div>
+    </section>
+
+    <!-- ══════════ NEWS ══════════ -->
+    <section id="page-news" class="page">
+      <div class="page-header">
+        <h2>Actualités</h2>
+        <p>Restez informé des dernières publications</p>
+      </div>
+      <div class="news-layout">
+        <div class="news-feed" id="news-feed"></div>
+        <div class="news-sidebar">
+          <div class="sidebar-card">
+            <h4>Filtrer par secteur</h4>
+            <div class="sidebar-sectors" id="sidebar-sectors"></div>
+          </div>
+          <div class="sidebar-card">
+            <h4>Entreprises suggérées</h4>
+            <div id="suggested-companies"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ MESSAGES ══════════ -->
+    <section id="page-messages" class="page">
+      <div class="messages-layout">
+        <div class="conv-list">
+          <div class="conv-header">
+            <h3>Messages</h3>
+            <button class="icon-btn" onclick="showToast('Nouveau message…')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+          <div id="conv-list-inner"></div>
+        </div>
+        <div class="chat-window" id="chat-window">
+          <div class="chat-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <p>Sélectionnez une conversation</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ FAVORITES ══════════ -->
+    <section id="page-favorites" class="page">
+      <div class="page-header">
+        <h2>Mes Favoris</h2>
+        <p>Vos entreprises sauvegardées</p>
+      </div>
+      <div class="companies-grid" id="favorites-list"></div>
+      <div id="favorites-empty" class="empty-state hidden">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <p>Aucun favori pour l'instant</p>
+        <button class="btn-primary sm" onclick="goTo('explore')">Explorer les entreprises</button>
+      </div>
+    </section>
+
+    <!-- ══════════ PROFILE ══════════ -->
+    <section id="page-profile" class="page">
+      <div class="profile-header-card">
+        <div class="profile-cover"></div>
+        <div class="profile-avatar-wrap">
+          <img id="profile-avatar-img" src="https://ui-avatars.com/api/?name=M&background=1E66FF&color=fff&size=100" alt="avatar" class="profile-avatar-big"/>
+          <button class="avatar-edit-btn" onclick="triggerAvatarUpload()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+        <h3 class="profile-name">Pierre Durand</h3>
+        <p class="profile-role">Entrepreneur · Brazzaville</p>
+        <div class="profile-stats">
+          <div><strong>12</strong><span>Favoris</span></div>
+          <div><strong>38</strong><span>Connexions</span></div>
+          <div><strong>5</strong><span>Messages</span></div>
+        </div>
+      </div>
+      <div class="profile-sections">
+        <div class="profile-card">
+          <h4>Mes informations</h4>
+          <div class="info-row"><label>Nom</label><span>Durand</span></div>
+          <div class="info-row"><label>Prénom</label><span>Pierre</span></div>
+          <div class="info-row"><label>Email</label><span>pierre@exemple.com</span></div>
+          <div class="info-row"><label>Profession</label><span>Chef d'entreprise</span></div>
+          <div class="info-row"><label>Ville</label><span>Brazzaville</span></div>
+          <button class="btn-outline mt" onclick="showEditProfileModal()">Modifier le profil</button>
+        </div>
+        <div class="profile-card">
+          <h4>Mes secteurs suivis</h4>
+          <div class="followed-sectors" id="followed-sectors"></div>
+          <button class="btn-outline mt" onclick="goTo('explore')">Gérer mes secteurs</button>
+        </div>
+        <div class="profile-card full">
+          <h4>Mon espace entreprise</h4>
+          <div class="enterprise-grid">
+            <div class="ent-tile" onclick="goTo('dashboard')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E66FF" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>Tableau de bord</span>
+            </div>
+            <div class="ent-tile" onclick="goTo('dashboard')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Z"/></svg>
+              <span>Mes Publications</span>
+            </div>
+            <div class="ent-tile" onclick="goTo('subscription')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F7B500" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Abonnement</span>
+            </div>
+            <div class="ent-tile" onclick="goTo('messages')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>Messagerie</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ COMPANY DETAIL ══════════ -->
+    <section id="page-company" class="page">
+      <button class="back-btn" onclick="goBack()">← Retour</button>
+      <div id="company-detail-content"></div>
+    </section>
+
+    <!-- ══════════ DASHBOARD ENTREPRISE ══════════ -->
+    <section id="page-dashboard" class="page">
+      <div class="page-header">
+        <h2>Espace Entreprise</h2>
+        <p>Gérez votre visibilité et vos publications</p>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dash-stat">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E66FF" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div><strong>142</strong><span>Prospects</span></div>
+        </div>
+        <div class="dash-stat">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          <div><strong>1 280</strong><span>Vues ce mois</span></div>
+        </div>
+        <div class="dash-stat">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F7B500" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div><strong>23</strong><span>Messages</span></div>
+        </div>
+        <div class="dash-stat">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Z"/></svg>
+          <div><strong>8</strong><span>Publications</span></div>
+        </div>
+      </div>
+      <div class="dash-sections">
+        <div class="dash-section">
+          <div class="ds-header">
+            <h4>Mes Publications</h4>
+            <button class="btn-primary sm" onclick="showPublishModal()">+ Publier</button>
+          </div>
+          <div class="pub-grid" id="pub-grid"></div>
+        </div>
+        <div class="dash-section">
+          <h4>Mes Prospects récents</h4>
+          <div id="prospects-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ SUBSCRIPTION ══════════ -->
+    <section id="page-subscription" class="page">
+      <div class="page-header">
+        <h2>Abonnements</h2>
+        <p>Boostez votre visibilité dès maintenant</p>
+      </div>
+      <div class="plans-grid">
+        <div class="plan-card">
+          <div class="plan-badge free">GRATUIT</div>
+          <div class="plan-price"><span>0</span> XAF/an</div>
+          <ul class="plan-features">
+            <li>✓ Visibilité dans l'annuaire</li>
+            <li>✓ 10 publications / an</li>
+            <li>✓ Messagerie de base</li>
+            <li class="off">✗ Option Refresh</li>
+            <li class="off">✗ Bannière publicitaire</li>
+          </ul>
+          <button class="plan-btn outline" onclick="showToast('Vous êtes sur le plan Gratuit')">Plan actuel</button>
+        </div>
+        <div class="plan-card">
+          <div class="plan-badge silver">SILVER</div>
+          <div class="plan-price"><span>15 000</span> XAF/an</div>
+          <ul class="plan-features">
+            <li>✓ Visibilité annuelle</li>
+            <li>✓ 2 publications / semaine</li>
+            <li>✓ Refresh sur 20 publications</li>
+            <li class="off">✗ Bannière publicitaire</li>
+            <li class="off">✗ Refresh illimité</li>
+          </ul>
+          <button class="plan-btn" onclick="showPayModal('Silver','15 000')">Choisir Silver</button>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-popular">⭐ Populaire</div>
+          <div class="plan-badge premium">PREMIUM</div>
+          <div class="plan-price"><span>35 000</span> XAF/an</div>
+          <ul class="plan-features">
+            <li>✓ Visibilité annuelle prioritaire</li>
+            <li>✓ 4 publications / semaine</li>
+            <li>✓ Refresh sur 50 publications</li>
+            <li>✓ Analytics avancés</li>
+            <li class="off">✗ Bannière inscription</li>
+          </ul>
+          <button class="plan-btn gold" onclick="showPayModal('Premium','35 000')">Choisir Premium</button>
+        </div>
+        <div class="plan-card">
+          <div class="plan-badge gold">GOLD</div>
+          <div class="plan-price"><span>75 000</span> XAF/an</div>
+          <ul class="plan-features">
+            <li>✓ Visibilité maximale</li>
+            <li>✓ 200 publications / an</li>
+            <li>✓ Bannière sur page d'inscription</li>
+            <li>✓ Refresh à chaque publication</li>
+            <li>✓ Support dédié</li>
+          </ul>
+          <button class="plan-btn" onclick="showPayModal('Gold','75 000')">Choisir Gold</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ REGISTER ══════════ -->
+    <section id="page-register" class="page">
+      <div class="auth-container">
+        <div class="auth-left">
+          <div class="auth-logo">
+            <svg width="48" height="48" viewBox="0 0 64 64"><defs><linearGradient id="alg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1E66FF"/><stop offset="100%" stop-color="#2ED47A"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#alg)"/><text x="32" y="43" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="26" fill="white">M</text></svg>
+            <h1>Makario</h1>
+          </div>
+          <h2>Rejoignez la plateforme<br/>des professionnels</h2>
+          <p>2 400+ entreprises vous attendent déjà</p>
+        </div>
+        <div class="auth-right">
+          <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('personal')">Compte Personnel</button>
+            <button class="auth-tab" onclick="switchAuthTab('company')">Compte Entreprise</button>
+          </div>
+          <!-- Step indicator -->
+          <div class="steps">
+            <div class="step active" data-step="1">1</div>
+            <div class="step-line"></div>
+            <div class="step" data-step="2">2</div>
+            <div class="step-line"></div>
+            <div class="step" data-step="3">3</div>
+          </div>
+          <div id="register-form-personal" class="reg-form">
+            <div class="form-step active" id="step1-personal">
+              <div class="form-row">
+                <div class="form-group"><label>Nom *</label><input type="text" id="reg-lastname" placeholder="Durand"/></div>
+                <div class="form-group"><label>Prénom *</label><input type="text" id="reg-firstname" placeholder="Pierre"/></div>
+              </div>
+              <div class="form-group"><label>Nom d'utilisateur *</label><input type="text" placeholder="@pierredurand"/></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="reg-email" placeholder="email@exemple.com"/></div>
+              <button class="btn-primary full" onclick="nextStep()">Suivant →</button>
+            </div>
+            <div class="form-step" id="step2-personal">
+              <div class="form-group"><label>Profession</label><input type="text" placeholder="Chef de projet, Développeur…"/></div>
+              <div class="form-group"><label>Ville</label>
+                <select><option value="">Sélectionner</option><option>Brazzaville</option><option>Pointe-Noire</option><option>Dolisie</option></select>
+              </div>
+              <div class="form-group toggle-row"><label>Partager mes informations</label><div class="toggle active" onclick="toggleThis(this)"></div></div>
+              <div class="form-row">
+                <button class="btn-outline" onclick="prevStep()">← Retour</button>
+                <button class="btn-primary" onclick="nextStep()">Suivant →</button>
+              </div>
+            </div>
+            <div class="form-step" id="step3-personal">
+              <div class="form-group"><label>Mot de passe *</label><input type="password" id="reg-password" placeholder="Min. 8 caractères"/></div>
+              <div class="form-group"><label>Confirmer le mot de passe *</label><input type="password" id="reg-confirm" placeholder="Répétez le mot de passe"/></div>
+              <div class="form-row">
+                <button class="btn-outline" onclick="prevStep()">← Retour</button>
+                <button class="btn-primary" onclick="completeRegister()">Créer mon compte ✓</button>
+              </div>
+            </div>
+          </div>
+          <p class="auth-switch">Déjà inscrit ? <button class="link-btn" onclick="goTo('login')">Se connecter</button></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ LOGIN ══════════ -->
+    <section id="page-login" class="page">
+      <div class="auth-container centered">
+        <div class="login-box">
+          <div class="auth-logo centered">
+            <svg width="48" height="48" viewBox="0 0 64 64"><defs><linearGradient id="llg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1E66FF"/><stop offset="100%" stop-color="#2ED47A"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#llg)"/><text x="32" y="43" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="26" fill="white">M</text></svg>
+            <h2>Makario</h2>
+          </div>
+          <h3>Connexion</h3>
+          <div class="form-group"><label>Email ou nom d'utilisateur</label><input type="email" id="login-email" placeholder="email@exemple.com"/></div>
+          <div class="form-group"><label>Mot de passe</label><input type="password" id="login-password" placeholder="••••••••"/></div>
+          <button class="btn-primary full" onclick="completeLogin()">Se connecter</button>
+          <div class="divider">ou</div>
+          <button class="btn-social" onclick="showToast('Connexion Mobile Money…')">📱 Mobile Money</button>
+          <button class="btn-social" onclick="showToast('Connexion Mobile Banking…')">🏦 Mobile Banking</button>
+          <p class="auth-switch">Pas encore de compte ? <button class="link-btn" onclick="goTo('register')">S'inscrire</button></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ABOUT ══════════ -->
+    <section id="page-about" class="page">
+      <div class="about-hero">
+        <h2>À propos de Makario</h2>
+        <p class="about-tagline">La plateforme qui connecte les entreprises et les professionnels</p>
+      </div>
+      <div class="about-content">
+        <div class="about-block">
+          <div class="ab-icon">🎯</div>
+          <h3>Notre Mission</h3>
+          <p>Makario est une application professionnelle à caractère commercial qui œuvre pour faciliter la visibilité des biens et services des entreprises et des jeunes entrepreneurs sur le marché.</p>
+        </div>
+        <div class="about-block">
+          <div class="ab-icon">🌍</div>
+          <h3>Accessibilité</h3>
+          <p>Améliorer l'accessibilité à distance des produits et services offerts par les entreprises évoluant partout sur le territoire.</p>
+        </div>
+        <div class="about-block">
+          <div class="ab-icon">🚀</div>
+          <h3>Entrepreneuriat</h3>
+          <p>Faire connaître les biens et services des jeunes entrepreneurs et assurer la bienveillance qualitative entre l'offre et la demande.</p>
+        </div>
+        <div class="about-block">
+          <div class="ab-icon">💬</div>
+          <h3>Communication</h3>
+          <p>Messagerie directe entre professionnels, publications d'actualités, annuaire complet par secteur et par localité.</p>
+        </div>
+      </div>
+      <div class="about-cta">
+        <button class="btn-primary" onclick="goTo('register')">Rejoindre Makario</button>
+        <button class="btn-outline" onclick="goTo('explore')">Explorer l'annuaire</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+            <defs><linearGradient id="flg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1E66FF"/><stop offset="100%" stop-color="#2ED47A"/></linearGradient></defs>
+            <circle cx="32" cy="32" r="32" fill="url(#flg)"/>
+            <text x="32" y="43" text-anchor="middle" font-family="Outfit" font-weight="800" font-size="26" fill="white">M</text>
+          </svg>
+          <span>Makario</span>
+        </div>
+        <p class="footer-desc">La plateforme qui connecte les entreprises et les professionnels du Congo au monde entier.</p>
+        <div class="footer-stats">
+          <div><strong>2 400+</strong><span>Entreprises</span></div>
+          <div><strong>12</strong><span>Secteurs</span></div>
+          <div><strong>100%</strong><span>Gratuit</span></div>
+        </div>
+      </div>
+      <div class="footer-links-group">
+        <div class="footer-col">
+          <h5>Plateforme</h5>
+          <ul>
+            <li><button onclick="goTo('explore')">Annuaire</button></li>
+            <li><button onclick="goTo('news')">Actualités</button></li>
+            <li><button onclick="goTo('messages')">Messagerie</button></li>
+            <li><button onclick="goTo('subscription')">Abonnements</button></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Compte</h5>
+          <ul>
+            <li><button onclick="goTo('register')">S'inscrire</button></li>
+            <li><button onclick="goTo('login')">Se connecter</button></li>
+            <li><button onclick="goTo('dashboard')">Espace Entreprise</button></li>
+            <li><button onclick="goTo('profile')">Mon Profil</button></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>À propos</h5>
+          <ul>
+            <li><button onclick="goTo('about')">Notre mission</button></li>
+            <li><button onclick="showToast('Contact : contact@makario.cg')">Contact</button></li>
+            <li><button onclick="showToast('Conditions en cours de rédaction')">CGU</button></li>
+            <li><button onclick="showToast('Politique en cours de rédaction')">Confidentialité</button></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 Makario. Tous droits réservés. Fait au Congo 🇨🇬</p>
+      <p class="footer-tagline">Réseau · Marketplace · Messagerie</p>
+    </div>
+  </footer>
+
+  <!-- ─── BOTTOM NAV ─── -->
+  <nav class="bottom-nav">
+    <button class="bn-item active" onclick="goTo('home')" data-page="home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Accueil</span>
+    </button>
+    <button class="bn-item" onclick="goTo('explore')" data-page="explore">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Explorer</span>
+    </button>
+    <button class="bn-item" onclick="goTo('news')" data-page="news">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Z"/></svg>
+      <span>Actualités</span>
+    </button>
+    <button class="bn-item" onclick="goTo('messages')" data-page="messages">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Messages</span>
+    </button>
+    <button class="bn-item" onclick="goTo('profile')" data-page="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profil</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ─── MODALS ─── -->
+<div id="modal-company" class="modal-overlay hidden" onclick="closeModal('modal-company')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-company')">✕</button>
+    <div id="modal-company-content"></div>
+  </div>
+</div>
+
+<div id="modal-pay" class="modal-overlay hidden" onclick="closeModal('modal-pay')">
+  <div class="modal small" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-pay')">✕</button>
+    <h3>Paiement de l'abonnement</h3>
+    <p id="modal-pay-desc"></p>
+    <div class="pay-options">
+      <button class="pay-btn" onclick="completePay()">📱 Mobile Money</button>
+      <button class="pay-btn" onclick="completePay()">🏦 Mobile Banking</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-publish" class="modal-overlay hidden" onclick="closeModal('modal-publish')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-publish')">✕</button>
+    <h3>Nouvelle Publication</h3>
+    <div class="form-group"><label>Titre</label><input type="text" placeholder="Titre de votre publication"/></div>
+    <div class="form-group"><label>Contenu</label><textarea rows="4" placeholder="Décrivez votre offre, votre actualité…"></textarea></div>
+    <div class="form-group">
+      <label>Image de couverture</label>
+      <div class="upload-zone" onclick="showToast('Sélectionner une image…')">📷 Glisser ou cliquer pour ajouter une image</div>
+    </div>
+    <button class="btn-primary full" onclick="completePublish()">Publier maintenant</button>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

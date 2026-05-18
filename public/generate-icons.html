@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Makario — Générateur d'icônes PNG</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; display: flex; flex-direction: column; align-items: center; padding: 40px; gap: 24px; }
+    h1 { color: #1E66FF; margin: 0; }
+    p { color: #6B7280; margin: 0; }
+    .cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,.08); text-align: center; }
+    canvas { display: block; border-radius: 12px; margin-bottom: 12px; }
+    button { background: #1E66FF; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; font-weight: 700; font-size: 14px; width: 100%; }
+    button:hover { background: #1555cc; }
+    .status { background: #d1fae5; color: #065f46; border-radius: 10px; padding: 12px 20px; font-weight: 600; display: none; }
+  </style>
+</head>
+<body>
+  <h1>🎨 Générateur d'icônes Makario</h1>
+  <p>Clique sur chaque bouton pour télécharger l'icône PNG correspondante.</p>
+  <p style="color:#EF4444;font-weight:600">⚠️ Mets les 3 fichiers téléchargés dans le dossier <code>public/</code></p>
+
+  <div class="cards">
+    <div class="card">
+      <canvas id="c192" width="192" height="192"></canvas>
+      <div style="font-weight:700;margin-bottom:8px">icon-192.png</div>
+      <button onclick="download('c192','icon-192.png')">⬇ Télécharger 192×192</button>
+    </div>
+    <div class="card">
+      <canvas id="c512" width="512" height="512"></canvas>
+      <div style="font-weight:700;margin-bottom:8px">icon-512.png</div>
+      <button onclick="download('c512','icon-512.png')">⬇ Télécharger 512×512</button>
+    </div>
+    <div class="card">
+      <canvas id="cm512" width="512" height="512"></canvas>
+      <div style="font-weight:700;margin-bottom:8px">icon-maskable-512.png</div>
+      <button onclick="download('cm512','icon-maskable-512.png')">⬇ Télécharger Maskable</button>
+    </div>
+  </div>
+
+  <button onclick="downloadAll()" style="max-width:320px;padding:14px;font-size:16px">📦 Tout télécharger d'un coup</button>
+  <div class="status" id="status">✅ Icônes téléchargées ! Mets-les dans le dossier public/</div>
+
+<script>
+function drawIcon(canvasId, size, maskable) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const s = size;
+  const pad = maskable ? s * 0.1 : 0;
+  const r = (s - pad * 2) / 2;
+  const cx = s / 2, cy = s / 2;
+
+  ctx.clearRect(0, 0, s, s);
+
+  // Fond maskable (carré plein) ou cercle
+  if (maskable) {
+    const grad = ctx.createLinearGradient(0, 0, s, s);
+    grad.addColorStop(0, '#1E66FF');
+    grad.addColorStop(1, '#2ED47A');
+    ctx.fillStyle = grad;
+    // Arrondi pour maskable safe zone
+    const rr = s * 0.2;
+    ctx.beginPath();
+    ctx.moveTo(rr, 0);
+    ctx.lineTo(s - rr, 0);
+    ctx.quadraticCurveTo(s, 0, s, rr);
+    ctx.lineTo(s, s - rr);
+    ctx.quadraticCurveTo(s, s, s - rr, s);
+    ctx.lineTo(rr, s);
+    ctx.quadraticCurveTo(0, s, 0, s - rr);
+    ctx.lineTo(0, rr);
+    ctx.quadraticCurveTo(0, 0, rr, 0);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    const grad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    grad.addColorStop(0, '#1E66FF');
+    grad.addColorStop(1, '#2ED47A');
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // Lettre M
+  const fontSize = maskable ? s * 0.38 : s * 0.42;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 ${fontSize}px "Segoe UI", Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('M', cx, cy + fontSize * 0.05);
+}
+
+drawIcon('c192', 192, false);
+drawIcon('c512', 512, false);
+drawIcon('cm512', 512, true);
+
+function download(canvasId, filename) {
+  const canvas = document.getElementById(canvasId);
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function downloadAll() {
+  setTimeout(() => download('c192', 'icon-192.png'), 0);
+  setTimeout(() => download('c512', 'icon-512.png'), 300);
+  setTimeout(() => download('cm512', 'icon-maskable-512.png'), 600);
+  setTimeout(() => { document.getElementById('status').style.display = 'block'; }, 800);
+}
+</script>
+</body>
+</html>
