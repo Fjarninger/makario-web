@@ -53,6 +53,7 @@
 </div>
 
 <!-- ═══════════════════════════════════ APP ═══════════════════════════════════ -->
+<div id="scroll-progress"></div>
 <div id="app" class="app hidden">
 
   <!-- ─── NAVBAR ─── -->
@@ -703,6 +704,17 @@
     </div>
   </footer>
 
+  <!-- ─── PWA INSTALL BANNER ─── -->
+  <div id="install-banner" class="hidden">
+    <div class="ib-icon">📲</div>
+    <div class="ib-text">
+      <strong>Installer Makario</strong>
+      <span>Accès rapide depuis votre écran d'accueil</span>
+    </div>
+    <button class="ib-btn" id="install-btn">Installer</button>
+    <button class="ib-close" id="install-close">✕</button>
+  </div>
+
   <!-- ─── BOTTOM NAV ─── -->
   <nav class="bottom-nav">
     <button class="bn-item active" onclick="goTo('home')" data-page="home">
@@ -728,39 +740,6 @@
   </nav>
 </div>
 
-<!-- ─── MODALS ─── -->
-<div id="modal-company" class="modal-overlay hidden" onclick="closeModal('modal-company')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal('modal-company')">✕</button>
-    <div id="modal-company-content"></div>
-  </div>
-</div>
-
-<div id="modal-pay" class="modal-overlay hidden" onclick="closeModal('modal-pay')">
-  <div class="modal small" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal('modal-pay')">✕</button>
-    <h3>Paiement de l'abonnement</h3>
-    <p id="modal-pay-desc"></p>
-    <div class="pay-options">
-      <button class="pay-btn" onclick="completePay()">📱 Mobile Money</button>
-      <button class="pay-btn" onclick="completePay()">🏦 Mobile Banking</button>
-    </div>
-  </div>
-</div>
-
-<div id="modal-publish" class="modal-overlay hidden" onclick="closeModal('modal-publish')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal('modal-publish')">✕</button>
-    <h3>Nouvelle Publication</h3>
-    <div class="form-group"><label>Titre</label><input type="text" placeholder="Titre de votre publication"/></div>
-    <div class="form-group"><label>Contenu</label><textarea rows="4" placeholder="Décrivez votre offre, votre actualité…"></textarea></div>
-    <div class="form-group">
-      <label>Image de couverture</label>
-      <div class="upload-zone" onclick="showToast('Sélectionner une image…')">📷 Glisser ou cliquer pour ajouter une image</div>
-    </div>
-    <button class="btn-primary full" onclick="completePublish()">Publier maintenant</button>
-  </div>
-</div>
 
 <!-- ─── TOAST ─── -->
 <div id="toast" class="toast hidden"></div>

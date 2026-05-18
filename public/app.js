@@ -339,16 +339,16 @@ async function loadHome() {
   if (companiesAll.length===0){const r=await apiFetch('GET','/companies');if(r.success)companiesAll=r.data;}
   const spotlight=document.getElementById('spotlight-list');
   if (spotlight) spotlight.innerHTML=companiesAll.slice(0,4).map(c=>`
-    <div class="spotlight-card" onclick="openCompany(${c.id})" style="cursor:pointer;background:#fff;border-radius:16px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);min-width:140px;flex-shrink:0">
-      <div style="font-size:36px;margin-bottom:8px">${c.cover||c.init}</div>
-      <div style="font-weight:700;font-size:12px;color:#0D1931;margin-bottom:4px">${c.name}</div>
-      <div style="font-size:11px;color:#1E66FF;font-weight:600">${c.sector}</div>
-      <div style="font-size:10px;color:#6B7280">📍 ${c.city}</div>
+    <div class="spotlight-card" onclick="openCompany(${c.id})">
+      <div style="font-size:36px;margin-bottom:10px">${c.cover||c.init}</div>
+      <div style="font-weight:800;font-size:11px;color:var(--navy,#0D1931);margin-bottom:3px;line-height:1.3">${c.name}</div>
+      <div style="font-size:10px;color:var(--blue,#1E66FF);font-weight:700">${c.sector}</div>
+      <div style="font-size:10px;color:#6B7280;margin-top:2px">📍 ${c.city}</div>
     </div>`).join('');
   const sectorsEl=document.getElementById('sectors-home');
   if (sectorsEl&&!sectorsEl.dataset.loaded){
     const rs=await apiFetch('GET','/sectors');
-    if(rs.success){sectorsEl.innerHTML=rs.data.map(s=>`<div class="sector-pill" onclick="exploreSector('${s.label}')" style="cursor:pointer;background:#fff;border-radius:12px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)"><div style="font-size:28px">${s.icon}</div><div style="font-weight:700;font-size:12px;margin-top:4px">${s.label}</div><div style="font-size:10px;color:#6B7280">${s.count}+</div></div>`).join('');sectorsEl.dataset.loaded='1';}
+    if(rs.success){sectorsEl.innerHTML=rs.data.map(s=>`<div class="sector-pill" onclick="exploreSector('${s.label}')"><div style="font-size:28px;margin-bottom:6px">${s.icon}</div><div style="font-weight:800;font-size:12px">${s.label}</div><div style="font-size:10px;color:#6B7280;margin-top:2px">${s.count}+</div></div>`).join('');sectorsEl.dataset.loaded='1';}
   }
 }
 
@@ -413,7 +413,7 @@ async function openCompany(id){
 // ─── NEWS ─────────────────────────────────────────────────────────
 async function loadNews(){
   const feed=document.getElementById('news-feed');if(!feed)return;
-  feed.innerHTML='<div style="padding:20px;text-align:center;color:#6B7280">Chargement…</div>';
+  feed.innerHTML=skeletonNewsCards(3);
   const r=await apiFetch('GET','/news');
   if(!r.success){feed.innerHTML=`<p style="color:red;padding:16px">${r.error}</p>`;return;}
   feed.innerHTML=r.data.map(n=>newsCard(n)).join('');
@@ -490,7 +490,7 @@ async function submitPost(){
 async function loadMessages(){
   const list=document.getElementById('conv-list-inner');if(!list)return;
   if(!token){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#6B7280;margin-bottom:12px">Connectez-vous pour accéder à vos messages</p><button class="btn-primary sm" onclick="goTo('login')">Se connecter</button></div>`;return;}
-  list.innerHTML='<div style="padding:20px;text-align:center;color:#6B7280">Chargement…</div>';
+  list.innerHTML=Array.from({length:3},()=>`<div class="conv-item skeleton-card"><div class="sk-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk-title"></div><div class="sk-line" style="width:60%"></div></div></div>`).join('');
   const r=await apiFetch('GET','/conversations');
   if(!r.success||r.data.length===0){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#6B7280;margin-bottom:12px">Pas encore de conversations</p><button class="btn-outline sm" onclick="goTo('explore')">Trouver des entreprises</button></div>`;return;}
   list.innerHTML=r.data.map(c=>`<div class="conv-item" onclick="openConv(${c.id},'${c.name}','${c.init||c.name?.slice(0,2)||'?'}')">
@@ -672,10 +672,17 @@ async function saveProfile(){
 async function loadDashboard(){
   if(!token){showToast('Connectez-vous','error');return goTo('login');}
   const rs=await apiFetch('GET','/stats');
-  if(rs.success){const s=rs.data;document.querySelectorAll('#page-dashboard .dash-stat').forEach((el,i)=>{const vals=[s.totalCompanies,s.totalUsers,s.totalNews,s.totalSectors];const n=el.querySelector('.stat-num,.dash-val');if(n&&vals[i]!==undefined)n.textContent=vals[i];});}
+  if(rs.success){
+    const s=rs.data;
+    const vals=[s.totalCompanies,s.totalUsers,s.totalNews,s.totalSectors];
+    document.querySelectorAll('#page-dashboard .dash-stat').forEach((el,i)=>{
+      const strong=el.querySelector('strong');
+      if(strong&&vals[i]!==undefined) animateCounter(strong,vals[i]);
+    });
+  }
   const rNews=await apiFetch('GET','/news');
-  const pubFeed=document.getElementById('dashboard-posts');
-  if(pubFeed&&rNews.success)pubFeed.innerHTML=rNews.data.slice(0,3).map(n=>`<div style="padding:10px 0;border-bottom:1px solid #f3f4f6"><div style="font-weight:600;font-size:13px">${n.title}</div><div style="font-size:11px;color:#6B7280;margin-top:3px">${formatTime(n.date)} · ♥ ${n.likes}</div></div>`).join('')||'<p style="color:#6B7280">Aucune publication</p>';
+  const pubFeed=document.getElementById('pub-grid');
+  if(pubFeed&&rNews.success)pubFeed.innerHTML=rNews.data.slice(0,5).map(n=>`<div style="padding:12px;border:1.5px solid #f3f4f6;border-radius:12px;margin-bottom:8px"><div style="font-weight:700;font-size:13px;color:#0D1931;margin-bottom:4px">${n.title}</div><div style="font-size:11px;color:#6B7280">${formatTime(n.date)} · ♥ ${n.likes} · ${(n.comments||[]).length} commentaires</div></div>`).join('')||'<p style="color:#6B7280;padding:10px 0">Aucune publication</p>';
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────
@@ -1008,8 +1015,9 @@ function processCrypto(coin, plan) {
 }
 
 function copyWireRef() {
-  const ref = 'MAK-' + document.querySelector('#wire-section strong:last-child')?.textContent || 'MAK-REF';
-  navigator.clipboard?.writeText(ref).catch(()=>{});
+  const refEl = document.querySelector('#wire-section [style*="color:#1E66FF"] strong');
+  const refText = refEl?.textContent || ('MAK-REF-' + Date.now().toString().slice(-6));
+  navigator.clipboard?.writeText(refText).catch(()=>{});
   showToast('Référence copiée !', 'success');
 }
 
@@ -1043,6 +1051,39 @@ function showPaymentProcessing(plan, price, method) {
 }
 
 function toggleThis(el){el.classList.toggle('active');}
+
+// ─── FONCTIONS UTILITAIRES ─────────────────────────────────────────
+function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+
+function animateCounter(el, target, duration) {
+  const num = parseInt(String(target).replace(/\s/g,''));
+  if (!el || isNaN(num)) return;
+  duration = duration || 1000;
+  let start = null;
+  const step = ts => {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    el.textContent = Math.floor(p * num).toLocaleString('fr-FR');
+    if (p < 1) requestAnimationFrame(step); else el.textContent = num.toLocaleString('fr-FR');
+  };
+  requestAnimationFrame(step);
+}
+
+function skeletonNewsCards(n) {
+  return Array.from({length: n}, () => `
+    <div class="news-card skeleton-card">
+      <div class="nc-header" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div class="sk-avatar"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="sk-title"></div>
+          <div class="sk-line" style="width:55%"></div>
+        </div>
+      </div>
+      <div class="sk-title" style="width:80%;margin-bottom:10px"></div>
+      <div class="sk-line"></div>
+      <div class="sk-line" style="width:88%;margin-top:7px"></div>
+    </div>`).join('');
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────
 function setNavAvatar(text){const el=document.getElementById('nav-avatar-init');if(el)el.textContent=text;}
@@ -1094,12 +1135,36 @@ async function init(){
   await loadHome();
 
   if(USE_MOCK){
-    // Afficher badge mode démo discret
     const badge=document.createElement('div');
     badge.style.cssText='position:fixed;top:8px;right:8px;background:#F59E0B;color:#fff;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;z-index:9998;opacity:.8';
     badge.textContent='DÉMO';badge.title='Mode démo — données en localStorage';
     document.body.appendChild(badge);
   }
+
+  // Barre de progression + classe scrolled sur la navbar
+  const _bar = document.getElementById('scroll-progress');
+  const _nav = document.querySelector('.navbar');
+  window.addEventListener('scroll', () => {
+    const top = window.scrollY;
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    if (_bar) _bar.style.width = (h > 0 ? (top / h * 100) : 0) + '%';
+    if (_nav) _nav.classList.toggle('scrolled', top > 10);
+  }, { passive: true });
+
+  // Banner installation PWA
+  let _installPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _installPrompt = e;
+    document.getElementById('install-banner')?.classList.remove('hidden');
+  });
+  document.getElementById('install-btn')?.addEventListener('click', () => {
+    if (_installPrompt) { _installPrompt.prompt(); _installPrompt.userChoice.then(() => { _installPrompt = null; }); }
+    document.getElementById('install-banner')?.classList.add('hidden');
+  });
+  document.getElementById('install-close')?.addEventListener('click', () => {
+    document.getElementById('install-banner')?.classList.add('hidden');
+  });
 }
 
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded', init);
