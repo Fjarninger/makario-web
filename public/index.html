@@ -286,35 +286,134 @@
     <section id="page-explore" class="page">
       <div class="page-header">
         <h2>Explorer</h2>
-        <p>Découvrez toutes les entreprises enregistrées</p>
+        <p>Entreprises · Personnes · Universités · Entrepreneurs</p>
       </div>
-      <div class="explore-toolbar">
-        <div class="search-bar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" placeholder="Rechercher…" id="explore-search" oninput="filterCompanies()" />
-        </div>
-        <div class="filter-row">
-          <select id="filter-sector" onchange="filterCompanies()">
-            <option value="">Tous les secteurs</option>
-            <option>TIC</option>
-            <option>Commerce</option>
-            <option>Prestations de services</option>
-            <option>BTP</option>
-            <option>Tourisme & Restauration</option>
-            <option>Culture & Arts</option>
-            <option>Santé</option>
-            <option>Éducation & Formation</option>
-          </select>
-          <select id="filter-city" onchange="filterCompanies()">
-            <option value="">Toutes les villes</option>
-            <option>Brazzaville</option>
-            <option>Pointe-Noire</option>
-            <option>Dolisie</option>
-            <option>Ouesso</option>
-          </select>
-        </div>
+
+      <!-- Onglets de navigation -->
+      <div class="explore-tabs">
+        <button class="et-tab active" data-tab="companies" onclick="switchExploreTab('companies')">🏢 <span>Entreprises</span></button>
+        <button class="et-tab" data-tab="people" onclick="switchExploreTab('people')">👥 <span>Personnes</span></button>
+        <button class="et-tab" data-tab="universities" onclick="switchExploreTab('universities')">🎓 <span>Universités</span></button>
+        <button class="et-tab" data-tab="entrepreneurs" onclick="switchExploreTab('entrepreneurs')">🚀 <span>Entrepreneurs</span></button>
       </div>
-      <div class="companies-grid" id="explore-list"></div>
+
+      <!-- ─── Tab: Entreprises ─── -->
+      <div id="tab-companies" class="explore-tab-content">
+        <div class="explore-toolbar">
+          <div class="search-bar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Rechercher une entreprise, un service…" id="explore-search" oninput="filterCompanies()" />
+          </div>
+          <div class="filter-row">
+            <select id="filter-sector" onchange="filterCompanies()">
+              <option value="">Tous les secteurs</option>
+              <option>TIC</option>
+              <option>Finance & Banque</option>
+              <option>Télécommunications</option>
+              <option>Énergie & Pétrole</option>
+              <option>Commerce</option>
+              <option>Prestations de services</option>
+              <option>BTP</option>
+              <option>Tourisme & Hôtellerie</option>
+              <option>Culture & Arts</option>
+              <option>Santé & Pharmacie</option>
+              <option>Éducation & Formation</option>
+              <option>Agriculture & Commerce</option>
+              <option>Sylviculture & Industrie</option>
+              <option>Médias & Divertissement</option>
+              <option>Assurances</option>
+              <option>Logistique & Services</option>
+              <option>Industrie & Commerce</option>
+              <option>E-commerce & Tech</option>
+            </select>
+            <select id="filter-city" onchange="filterCompanies()">
+              <option value="">Toutes les villes</option>
+              <option>Brazzaville</option>
+              <option>Pointe-Noire</option>
+              <option>Dolisie</option>
+              <option>Ouesso</option>
+              <option>Lagos</option>
+              <option>Nairobi</option>
+            </select>
+          </div>
+        </div>
+        <div class="companies-grid" id="explore-list"></div>
+      </div>
+
+      <!-- ─── Tab: Personnes ─── -->
+      <div id="tab-people" class="explore-tab-content hidden">
+        <div class="explore-toolbar">
+          <div class="search-bar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Rechercher par nom, profession, compétence…" id="people-search" oninput="filterPeople()" />
+          </div>
+        </div>
+        <div class="people-grid" id="people-list"></div>
+      </div>
+
+      <!-- ─── Tab: Universités & Écoles ─── -->
+      <div id="tab-universities" class="explore-tab-content hidden">
+        <div class="explore-toolbar">
+          <div class="search-bar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Rechercher une université, une école…" id="uni-search" oninput="filterUniversities()" />
+          </div>
+          <div class="filter-row">
+            <select id="filter-uni-country" onchange="filterUniversities()">
+              <option value="">Tous les pays</option>
+              <option>Congo</option>
+              <option>RD Congo</option>
+              <option>Cameroun</option>
+              <option>Sénégal</option>
+              <option>Côte d'Ivoire</option>
+              <option>Togo</option>
+              <option>Gabon</option>
+            </select>
+            <select id="filter-uni-type" onchange="filterUniversities()">
+              <option value="">Tous les types</option>
+              <option>Université Publique</option>
+              <option>Institut Privé</option>
+              <option>École d'Ingénieurs</option>
+              <option>École de Gestion</option>
+              <option>Institut Professionnel</option>
+            </select>
+          </div>
+        </div>
+        <div class="universities-grid" id="universities-list"></div>
+      </div>
+
+      <!-- ─── Tab: Hub Entrepreneurs ─── -->
+      <div id="tab-entrepreneurs" class="explore-tab-content hidden">
+        <div class="explore-toolbar">
+          <div class="search-bar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Rechercher une startup, un entrepreneur…" id="ent-search" oninput="filterEntrepreneurs()" />
+          </div>
+          <div class="filter-row">
+            <select id="filter-ent-sector" onchange="filterEntrepreneurs()">
+              <option value="">Tous les secteurs</option>
+              <option>Fintech</option>
+              <option>AgriTech</option>
+              <option>HealthTech</option>
+              <option>EdTech</option>
+              <option>Logistique & Tech</option>
+              <option>RH & Recrutement</option>
+              <option>Énergie Verte</option>
+              <option>E-commerce</option>
+            </select>
+            <select id="filter-ent-stage" onchange="filterEntrepreneurs()">
+              <option value="">Toutes les phases</option>
+              <option>Idée</option>
+              <option>MVP</option>
+              <option>Lancement</option>
+              <option>Seed</option>
+              <option>Croissance</option>
+            </select>
+          </div>
+        </div>
+        <div class="entrepreneurs-grid" id="entrepreneurs-list"></div>
+      </div>
+
     </section>
 
     <!-- ══════════ NEWS ══════════ -->

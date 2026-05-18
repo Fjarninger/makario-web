@@ -18,30 +18,95 @@ let   socket       = null;
 // ─── DONNÉES MOCK (mode démo) ──────────────────────────────────────
 const MOCK = {
   companies: [
-    { id:1, name:'SIGTH-TECH CONGO', sector:'TIC', city:'Brazzaville', services:'Développement web et mobile, solutions informatiques sur mesure, hébergement cloud.', vision:'Être le partenaire N°1 du peuple congolais dans le domaine des TIC.', address:'84, Rue Mayama, Brazzaville', cover:'💻', init:'ST' },
-    { id:2, name:'BEST INFORMATIQUE', sector:'TIC', city:'Pointe-Noire', services:'Vente de matériel informatique, maintenance, formation, réseaux.', vision:'Digitaliser les entreprises congolaises à moindre coût.', address:'Centre-ville, Pointe-Noire', cover:'🖥️', init:'BI' },
-    { id:3, name:'EGCM', sector:'Éducation & Formation', city:'Brazzaville', services:'Formation professionnelle qualifiante, coaching emploi, stages en entreprise.', vision:"Former la jeunesse congolaise pour l'emploi de demain.", address:'84, Rue Mayama, Immeuble BGF1, 1er étage', cover:'📚', init:'EG' },
-    { id:4, name:'AOFIP', sector:'Éducation & Formation', city:'Brazzaville', services:'Formation professionnelle et qualifiante, insertion professionnelle, coaching.', vision:"Vers l'emploi, mais pas seul.", address:'Rue Matsoua, Brazzaville', cover:'🎓', init:'AO' },
-    { id:5, name:'AI COMMUNICATION', sector:'TIC', city:'Brazzaville', services:'Agence de communication digitale, création de contenu, réseaux sociaux, branding.', vision:'Booster la visibilité des marques congolaises.', address:'Plateau de 15 ans, Brazzaville', cover:'📡', init:'AI' },
-    { id:6, name:'MAGIC DESIGN', sector:'Culture & Arts', city:'Pointe-Noire', services:"Design graphique, identité visuelle, création de logo, impression.", vision:"L'art au service des entreprises.", address:'Lumumba, Pointe-Noire', cover:'🎨', init:'MD' },
-    { id:7, name:'MUSAS CONGO', sector:'Commerce', city:'Brazzaville', services:'Distribution alimentaire, import-export, grossiste, livraison.', vision:'Nourrir le Congo, de Brazzaville à Owando.', address:'Marché Total, Brazzaville', cover:'🛒', init:'MC' },
-    { id:8, name:'BTP PRO CONGO', sector:'BTP', city:'Dolisie', services:'Construction, rénovation, génie civil, architecture, études techniques.', vision:'Bâtir le Congo moderne, pierre par pierre.', address:'Centre, Dolisie', cover:'🏗️', init:'BP' },
+    // ── Partenaires locaux ─────────────────────────────────────────
+    { id:1, name:'SIGTH-TECH CONGO', sector:'TIC', city:'Brazzaville', services:'Développement web et mobile, solutions informatiques sur mesure, hébergement cloud.', vision:'Être le partenaire N°1 du peuple congolais dans le domaine des TIC.', address:'84, Rue Mayama, Brazzaville', phone:'+242 06 634 00 00', email:'contact@sigth-tech.com', cover:'💻', init:'ST' },
+    { id:2, name:'BEST INFORMATIQUE', sector:'TIC', city:'Pointe-Noire', services:'Vente de matériel informatique, maintenance, formation, réseaux.', vision:'Digitaliser les entreprises congolaises à moindre coût.', address:'Centre-ville, Pointe-Noire', phone:'+242 05 512 00 00', cover:'🖥️', init:'BI' },
+    { id:3, name:'EGCM', sector:'Éducation & Formation', city:'Brazzaville', services:'Formation professionnelle qualifiante, coaching emploi, stages en entreprise.', vision:"Former la jeunesse congolaise pour l'emploi de demain.", address:'84, Rue Mayama, Immeuble BGF1, 1er étage', phone:'+242 06 681 00 00', email:'egcm@formation.cg', cover:'📚', init:'EG' },
+    { id:4, name:'AOFIP', sector:'Éducation & Formation', city:'Brazzaville', services:'Formation professionnelle et qualifiante, insertion professionnelle, coaching.', vision:"Vers l'emploi, mais pas seul.", address:'Rue Matsoua, Brazzaville', phone:'+242 06 672 00 00', cover:'🎓', init:'AO' },
+    { id:5, name:'AI COMMUNICATION', sector:'TIC', city:'Brazzaville', services:'Agence de communication digitale, création de contenu, réseaux sociaux, branding.', vision:'Booster la visibilité des marques congolaises.', address:'Plateau des 15 ans, Brazzaville', phone:'+242 06 663 00 00', email:'contact@aicommunication.cg', cover:'📡', init:'AI' },
+    { id:6, name:'MAGIC DESIGN', sector:'Culture & Arts', city:'Pointe-Noire', services:"Design graphique, identité visuelle, création de logo, impression.", vision:"L'art au service des entreprises.", address:'Avenue Lumumba, Pointe-Noire', phone:'+242 05 545 00 00', cover:'🎨', init:'MD' },
+    { id:7, name:'MUSAS CONGO', sector:'Commerce', city:'Brazzaville', services:'Distribution alimentaire, import-export, grossiste, livraison.', vision:'Nourrir le Congo, de Brazzaville à Owando.', address:'Marché Total, Brazzaville', phone:'+242 06 623 00 00', cover:'🛒', init:'MC' },
+    { id:8, name:'BTP PRO CONGO', sector:'BTP', city:'Dolisie', services:'Construction, rénovation, génie civil, architecture, études techniques.', vision:'Bâtir le Congo moderne, pierre par pierre.', address:'Centre-ville, Dolisie', phone:'+242 05 782 00 00', cover:'🏗️', init:'BP' },
+    // ── Grandes entreprises du Congo ───────────────────────────────
+    { id:9, name:'BGFI Bank Congo', sector:'Finance & Banque', city:'Brazzaville', services:"Banque universelle, crédit aux entreprises et particuliers, épargne, transferts internationaux, monétique, crédit immobilier.", vision:"Être la banque de référence de l'Afrique Centrale.", address:'Boulevard Denis Sassou Nguesso, Centre-ville, Brazzaville', phone:'+242 05 305 00 00', email:'contact@bgfi.com', website:'www.bgfi.com', cover:'🏦', init:'BG', verified:true },
+    { id:10, name:'MTN Congo', sector:'Télécommunications', city:'Brazzaville', services:"Téléphonie mobile, internet 4G/5G, MTN Mobile Money, forfaits data, voix et SMS pour particuliers et entreprises.", vision:"Connecter chaque Congolais au monde numérique.", address:'Avenue du 31 Juillet, BP 2892, Brazzaville', phone:'8888', email:'customercare@mtn.cg', website:'www.mtn.cg', cover:'📡', init:'MT', verified:true },
+    { id:11, name:'Airtel Congo', sector:'Télécommunications', city:'Brazzaville', services:"Téléphonie mobile, Airtel Money, internet 4G, offres prépayées et postpayées, roaming international.", vision:"La connectivité accessible pour tous les Congolais.", address:'Avenue Matsoua, Quartier Poto-Poto, Brazzaville', phone:'128', email:'support@airtel.cg', website:'www.airtel.cg', cover:'📱', init:'AC', verified:true },
+    { id:12, name:'SNPC', sector:'Énergie & Pétrole', city:'Brazzaville', services:"Exploration, production et commercialisation du pétrole brut congolais. Partenariats JV avec TotalEnergies, ENI, Chevron.", vision:"Valoriser les ressources pétrolières du Congo au profit du peuple congolais.", address:'Avenue du Port, BP 188, Brazzaville', phone:'+242 05 622 00 00', email:'snpc@snpc.cg', cover:'⛽', init:'SN', verified:true },
+    { id:13, name:'TotalEnergies Congo', sector:'Énergie & Pétrole', city:'Pointe-Noire', services:"Distribution de carburants, lubrifiants, stations-service, gaz domestique, solutions industrielles.", vision:"Énergie propre et accessible à tous les Congolais.", address:'Port Autonome de Pointe-Noire, BP 1004', phone:'+242 05 534 00 00', email:'congo@totalenergies.com', website:'totalenergies.cg', cover:'🛢️', init:'TE', verified:true },
+    { id:14, name:'CIB (Congolaise Industrielle des Bois)', sector:'Sylviculture & Industrie', city:'Ouesso', services:"Exploitation forestière certifiée FSC, scierie industrielle, transformation du bois, exportation vers l'Europe et l'Asie.", vision:"Une industrie du bois responsable, durable et créatrice d'emplois au Congo.", address:'BP 3, Ouesso, Département Sangha', phone:'+242 05 767 00 00', email:'cib@cib-bois.com', cover:'🪵', init:'CI', verified:true },
+    { id:15, name:'Olam Congo', sector:'Agriculture & Commerce', city:'Brazzaville', services:"Négoce agricole, transformation alimentaire, huile de palme, sucre, farines. Distribution nationale et export.", vision:"Nourrir le monde en partant du Congo.", address:'Zone Industrielle, Brazzaville', phone:'+242 05 300 00 00', website:'www.olamgroup.com', cover:'🌿', init:'OL', verified:true },
+    { id:16, name:'Canal+ Congo', sector:'Médias & Divertissement', city:'Brazzaville', services:"Télévision par satellite, bouquets Canal+ Afrique, streaming, contenus africains et internationaux.", vision:"Le meilleur du divertissement pour l'Afrique.", address:'Avenue du Général de Gaulle, Brazzaville', phone:'+242 05 500 00 00', website:'www.canalplus.com/afrique', cover:'📺', init:'C+', verified:true },
+    { id:17, name:'Azur Assurances Congo', sector:'Assurances', city:'Brazzaville', services:"Assurance vie, multirisques habitation, auto, santé entreprise, responsabilité civile professionnelle.", vision:"Protéger les familles et les entreprises congolaises.", address:'Rue Lyautey, Centre-ville, Brazzaville', phone:'+242 05 558 00 00', email:'azur@azurassurances.cg', cover:'🛡️', init:'AZ', verified:true },
+    { id:18, name:'La Poste du Congo', sector:'Logistique & Services', city:'Brazzaville', services:"Courrier postal, envoi de colis, mandat postal, épargne postale, numérisation des services publics.", vision:"Relier chaque coin du Congo à moindre coût.", address:'Rond-Point de la Poste, Centre-ville, Brazzaville', phone:'+242 05 281 00 00', cover:'✉️', init:'LP', verified:true },
+    { id:19, name:'Hôtel Ledger Plaza Brazzaville', sector:'Tourisme & Hôtellerie', city:'Brazzaville', services:"Hôtel 5 étoiles, restaurant gastronomique, rooftop bar, salles de conférences, spa, piscine.", vision:"L'hospitalité haut de gamme au cœur de Brazzaville.", address:"Avenue de l'OUA, Centre-ville, Brazzaville", phone:'+242 06 514 00 00', website:'ledgerplazabrazzaville.com', cover:'🏨', init:'HL', verified:true },
+    { id:20, name:'CB Pharma Congo', sector:'Santé & Pharmacie', city:'Brazzaville', services:"Grossiste pharmaceutique, distribution de médicaments essentiels, dispositifs médicaux, vaccins.", vision:"Un médicament disponible pour chaque Congolais.", address:'Plateau des 15 ans, Brazzaville', phone:'+242 06 645 00 00', cover:'💊', init:'CP', verified:false },
+    // ── Grandes entreprises africaines ─────────────────────────────
+    { id:21, name:'Dangote Group', sector:'Industrie & Commerce', city:'Lagos', services:"Ciment, sucre, farine, sel, pétrochimie. Leader industriel présent dans 20 pays africains.", vision:"Industrialiser l'Afrique depuis le continent.", address:'Union Marble House, 1 Alfred Rewane Road, Lagos, Nigeria', phone:'+234 1 280 4000', website:'www.dangote.com', cover:'🏭', init:'DG', verified:true, country:'Nigeria 🇳🇬' },
+    { id:22, name:'Safaricom', sector:'Télécommunications', city:'Nairobi', services:"Téléphonie mobile, M-Pesa Mobile Money (leader mondial du paiement mobile), internet 4G/5G, solutions IoT.", vision:"Transformer la vie des Africains par la technologie.", address:'Safaricom House, Waiyaki Way, Nairobi, Kenya', phone:'+254 722 000 000', website:'www.safaricom.co.ke', cover:'📶', init:'SF', verified:true, country:'Kenya 🇰🇪' },
+    { id:23, name:'Jumia Group', sector:'E-commerce & Tech', city:'Lagos', services:"Marketplace e-commerce panafricain, Jumia Food, Jumia Pay. Opère dans 11 pays africains.", vision:"Premier e-commerce africain coté en bourse (NYSE).", address:'94 Broad Street, Lagos, Nigeria', phone:'+234 700 JUMIA', website:'www.jumia.com', cover:'🛍️', init:'JU', verified:true, country:'Nigeria 🇳🇬' },
+    { id:24, name:'Equity Bank Group', sector:'Finance & Banque', city:'Nairobi', services:"Banque digitale, microfinance, crédit PME, assurance, EazzyBiz business banking. 7 pays africains.", vision:"Transformer des vies, donner de la dignité, étendre la prospérité.", address:'Equity Centre, Hospital Road, Nairobi, Kenya', phone:'+254 763 000 000', website:'www.equitybankgroup.com', cover:'🏦', init:'EQ', verified:true, country:'Kenya 🇰🇪' },
   ],
   sectors: [
     { id:'tic', label:'TIC', icon:'💻', count:124 },
+    { id:'finance', label:'Finance & Banque', icon:'🏦', count:45 },
+    { id:'telecom', label:'Télécoms', icon:'📡', count:18 },
+    { id:'energie', label:'Énergie & Pétrole', icon:'⛽', count:32 },
     { id:'commerce', label:'Commerce', icon:'🛒', count:312 },
-    { id:'services', label:'Prestations de services', icon:'⚙️', count:198 },
+    { id:'services', label:'Prestations', icon:'⚙️', count:198 },
     { id:'btp', label:'BTP', icon:'🏗️', count:87 },
-    { id:'tourisme', label:'Tourisme & Restauration', icon:'🍽️', count:64 },
+    { id:'tourisme', label:'Tourisme', icon:'🍽️', count:64 },
     { id:'culture', label:'Culture & Arts', icon:'🎨', count:43 },
     { id:'sante', label:'Santé', icon:'🏥', count:91 },
-    { id:'education', label:'Éducation & Formation', icon:'📚', count:76 },
+    { id:'education', label:'Formation', icon:'📚', count:76 },
+    { id:'agri', label:'Agriculture', icon:'🌿', count:29 },
+    { id:'media', label:'Médias', icon:'📺', count:21 },
+    { id:'industrie', label:'Industrie', icon:'🏭', count:44 },
   ],
   news: [
     { id:1, company:'EGCM', avatar:'EG', title:'Formation Femme & TIC — Inscriptions ouvertes!', body:'La prochaine session de formation Excel, comptabilité et bureautique commence le 14 Mars.', emoji:'📊', date: new Date(Date.now()-3600000).toISOString(), likes:24, comments:[] },
     { id:2, company:'AOFIP', avatar:'AO', title:"Offre de stage bénévole en entreprise", body:"Je prépare mon stage en entreprise. Vers l'emploi mais pas seul.", emoji:'💼', date: new Date(Date.now()-7200000).toISOString(), likes:41, comments:[] },
-    { id:3, company:'AI COMMUNICATION', avatar:'AI', title:'Nouveau service : Community Management', body:'Nous lançons notre offre de gestion des réseaux sociaux pour les PME.', emoji:'📱', date: new Date(Date.now()-86400000).toISOString(), likes:18, comments:[] },
+    { id:3, company:'AI COMMUNICATION', avatar:'AI', title:'Nouveau service : Community Management', body:'Nous lançons notre offre de gestion des réseaux sociaux pour les PME congolaises.', emoji:'📱', date: new Date(Date.now()-86400000).toISOString(), likes:18, comments:[] },
     { id:4, company:'SIGTH-TECH CONGO', avatar:'ST', title:"Développement d'application mobile sur mesure", body:"Vous avez un projet d'application ? Nous transformons vos idées en solutions numériques performantes.", emoji:'📲', date: new Date(Date.now()-172800000).toISOString(), likes:56, comments:[] },
+    { id:5, company:'MTN Congo', avatar:'MT', title:'MTN MoMo — Le paiement mobile simplifié', body:"Payez vos factures, envoyez de l'argent et rechargez en quelques secondes avec MTN Mobile Money.", emoji:'💸', date: new Date(Date.now()-259200000).toISOString(), likes:89, comments:[] },
+    { id:6, company:'BGFI Bank Congo', avatar:'BG', title:'Ouverture de compte en ligne — 100% digital', body:'BGFI Bank Congo lance son service ouverture de compte 100% en ligne. Disponible en 24h sans déplacement.', emoji:'🏦', date: new Date(Date.now()-345600000).toISOString(), likes:134, comments:[] },
+  ],
+  people: [
+    { id:'p1', name:'Serge Tambou', profession:'Développeur Full-Stack', city:'Brazzaville', country:'Congo', bio:'Fondateur de SIGTH-TECH CONGO. 8 ans en développement web/mobile. Expert React & Node.js.', skills:['JavaScript','React','Node.js','Flutter'], connections:124, avatar:'ST', companyId:1 },
+    { id:'p2', name:'Espoir Goma', profession:'Directeur Pédagogique', city:'Brazzaville', country:'Congo', bio:'Directeur pédagogique à EGCM. Expert en formation professionnelle et insertion emploi au Congo.', skills:['Formation','Management','Pédagogie','RH'], connections:89, avatar:'EG', companyId:3 },
+    { id:'p3', name:'Aimée Itoua', profession:'Directrice Communication', city:'Brazzaville', country:'Congo', bio:'Directrice d\'AI Communication. Spécialiste du marketing digital pour les PME africaines.', skills:['Marketing Digital','Social Media','Branding','Content'], connections:213, avatar:'AI', companyId:5 },
+    { id:'p4', name:'Jean-Marie Mouanda', profession:'Ingénieur Pétrolier', city:'Pointe-Noire', country:'Congo', bio:'10 ans d\'expérience dans le pétrole offshore. Expert forage et production pour TotalEnergies Congo.', skills:['Géologie Pétrolière','Forage','HSE','Anglais Technique'], connections:67, avatar:'JM' },
+    { id:'p5', name:'Grâce Mbemba', profession:'Architecte DESA', city:'Brazzaville', country:'Congo', bio:'Architecte spécialisée en construction durable et urbanisme tropical. Fondatrice de son cabinet.', skills:['Architecture','AutoCAD','Revit','BTP Durable'], connections:156, avatar:'GM' },
+    { id:'p6', name:'Patrick Loubaki', profession:'Entrepreneur & Investisseur', city:'Brazzaville', country:'Congo', bio:'Fondateur de 3 startups tech en Afrique centrale. Mentor auprès des jeunes entrepreneurs congolais.', skills:['Entrepreneuriat','Fintech','Leadership','Levée de Fonds'], connections:412, avatar:'PL', isEntrepreneur:true },
+    { id:'p7', name:'Dorothée Nkossi', profession:'Médecin & Innovatrice HealthTech', city:'Brazzaville', country:'Congo', bio:'Médecin généraliste et cofondatrice d\'une plateforme de télémédecine. Engagée pour la santé numérique au Congo.', skills:['Médecine','Télémédecine','Santé Publique','Innovation'], connections:98, avatar:'DN' },
+    { id:'p8', name:'Christian Bouya', profession:'Expert-Comptable ONECCA', city:'Pointe-Noire', country:'Congo', bio:'Expert-comptable agréé ONECCA Congo. Spécialiste fiscalité congolaise, comptabilité SYSCOHADA, audit PME.', skills:['Comptabilité','Fiscalité Congo','Audit','SYSCOHADA'], connections:143, avatar:'CB' },
+    { id:'p9', name:'Marie-France Taty', profession:'Enseignante & Formatrice TIC', city:'Brazzaville', country:'Congo', bio:'Professeure de mathématiques et formatrice en TIC. Pionnière de la digitalisation de l\'éducation au Congo.', skills:['Enseignement','Formation TIC','Mathématiques','Pédagogie Numérique'], connections:75, avatar:'MF' },
+    { id:'p10', name:'Rodrigue Nzaou', profession:'Designer UI/UX Senior', city:'Brazzaville', country:'Congo', bio:'Designer senior chez MAGIC DESIGN. Passionné par l\'identité visuelle des marques africaines et le design inclusif.', skills:['Figma','Adobe Suite','UI/UX','Branding Africain'], connections:187, avatar:'RN', companyId:6 },
+    { id:'p11', name:'Blaise Moukagni', profession:'Ingénieur Réseaux & Télécoms', city:'Brazzaville', country:'Congo', bio:'Ingénieur télécoms chez Airtel Congo. Expert déploiement infrastructure 4G/5G et optimisation réseau.', skills:['Réseaux','4G/5G','Cisco CCNP','Télécoms'], connections:54, avatar:'BM', companyId:11 },
+    { id:'p12', name:'Laetitia Nguimbi', profession:'Juriste d\'Entreprise OHADA', city:'Brazzaville', country:'Congo', bio:'Juriste spécialisée en droit des affaires OHADA et droit social congolais. Conseil et accompagnement PME.', skills:['Droit OHADA','Contrats','Droit Social','Contentieux'], connections:91, avatar:'LN' },
+  ],
+  universities: [
+    { id:'u1', name:'Université Marien Ngouabi (UMN)', type:'Université Publique', city:'Brazzaville', country:'Congo 🇨🇬', faculties:['Droit, Économie & Gestion','Lettres & Sciences Humaines','Sciences & Techniques','Médecine & Pharmacie','ENSP Polytechnique','FLSH'], address:'Boulevard Denis Sassou Nguesso, BP 69, Brazzaville', phone:'+242 06 665 12 34', email:'rectorat@umng.cg', founded:1971, students:'25 000+', cover:'🎓', init:'UMN', verified:true },
+    { id:'u2', name:'ENSP (École Nationale Supérieure Polytechnique)', type:'École d\'Ingénieurs', city:'Brazzaville', country:'Congo 🇨🇬', faculties:['Génie Civil','Génie Électrique','Génie Informatique & Télécoms','Génie Chimique & Procédés','Génie Mécanique'], address:'Campus UMN, BP 69, Brazzaville', phone:'+242 06 612 00 00', email:'ensp@umng.cg', founded:1962, students:'2 500+', cover:'⚙️', init:'EN', verified:true },
+    { id:'u3', name:'IST Congo (Institut Supérieur de Technologie)', type:'Institut Privé', city:'Brazzaville', country:'Congo 🇨🇬', faculties:['Informatique & Réseaux','Développement Web & Mobile','Gestion Informatisée','Administration Systèmes & Cloud'], address:'Quartier Bacongo, Avenue Bouenza, Brazzaville', phone:'+242 06 680 00 00', email:'contact@ist-congo.com', founded:2003, students:'1 200+', cover:'💻', init:'IS', verified:true },
+    { id:'u4', name:'Université de Pointe-Noire (UPN)', type:'Université Publique', city:'Pointe-Noire', country:'Congo 🇨🇬', faculties:['Sciences & Techniques Pétrolières','Sciences Économiques','Droit des Affaires','Ingénierie Offshore'], address:'Avenue du Général de Gaulle, Pointe-Noire', phone:'+242 05 549 00 00', email:'upn@education.cg', founded:2012, students:'5 000+', cover:'🏛️', init:'UP', verified:true },
+    { id:'u5', name:'ESSEC Congo', type:'École de Gestion', city:'Brazzaville', country:'Congo 🇨🇬', faculties:['Commerce & Marketing','Finance d\'Entreprise','Management Interculturel','Entrepreneuriat & Innovation'], address:'Plateau des 15 ans, Brazzaville', phone:'+242 06 670 00 00', email:'info@essec-congo.com', founded:2008, students:'800+', cover:'📊', init:'ES', verified:false },
+    { id:'u6', name:'IFEG (Institut de Formation à l\'Expertise et à la Gestion)', type:'Institut Professionnel', city:'Brazzaville', country:'Congo 🇨🇬', faculties:['Comptabilité SYSCOHADA','Gestion des RH','Fiscalité Congolaise','Audit & Contrôle de Gestion'], address:'Rue Félix Éboué, Brazzaville', phone:'+242 06 655 00 00', email:'ifeg@formation.cg', founded:2005, students:'600+', cover:'📋', init:'IF', verified:false },
+    { id:'u7', name:'Université de Yaoundé I', type:'Université Publique', city:'Yaoundé', country:'Cameroun 🇨🇲', faculties:['Sciences','Médecine','Droit','Lettres','Économie & Gestion'], address:'Ngoa-Ekellé, BP 1365, Yaoundé', phone:'+237 222 23 13 89', email:'rectorat@uy1.uninet.cm', founded:1962, students:'45 000+', cover:'🎓', init:'UY', verified:true },
+    { id:'u8', name:'Université Cheikh Anta Diop (UCAD)', type:'Université Publique', city:'Dakar', country:'Sénégal 🇸🇳', faculties:['Sciences & Technologie','Droit','Médecine','Lettres','Sciences Économiques'], address:'Boulevard Dial Diop, Dakar', phone:'+221 33 825 05 30', email:'contact@ucad.sn', website:'www.ucad.sn', founded:1957, students:'80 000+', cover:'🏛️', init:'UC', verified:true },
+    { id:'u9', name:'Université Félix Houphouët-Boigny', type:'Université Publique', city:'Abidjan', country:'Côte d\'Ivoire 🇨🇮', faculties:['Sciences','Médecine','Droit','Lettres','Sciences Économiques'], address:'Cocody, 01 BP V 34, Abidjan', phone:'+225 27 22 44 08 21', email:'presidence@univ-fhb.edu.ci', founded:1963, students:'60 000+', cover:'🎓', init:'UF', verified:true },
+    { id:'u10', name:'Université de Kinshasa (UNIKIN)', type:'Université Publique', city:'Kinshasa', country:'RD Congo 🇨🇩', faculties:['Sciences','Médecine','Droit','Lettres','Sciences Sociales & Politiques'], address:'Campus de Lemba, BP 127, Kinshasa XI', phone:'+243 997 000 000', email:'rectorat@unikin.ac.cd', founded:1954, students:'35 000+', cover:'🏫', init:'UK', verified:true },
+    { id:'u11', name:'Université de Lomé', type:'Université Publique', city:'Lomé', country:'Togo 🇹🇬', faculties:['Sciences','Médecine','Droit','Lettres','ESTIM','FASEG'], address:'BP 1515, Lomé', phone:'+228 22 21 35 00', email:'presidence@univ-lome.tg', founded:1970, students:'25 000+', cover:'🎓', init:'UL', verified:true },
+    { id:'u12', name:'Université Omar Bongo (UOB)', type:'Université Publique', city:'Libreville', country:'Gabon 🇬🇦', faculties:['Sciences','Médecine','Droit','Lettres','Sciences Économiques'], address:'BP 13131, Libreville', phone:'+241 01 73 20 14', email:'rectorat@uob.ga', founded:1970, students:'20 000+', cover:'🏛️', init:'UO', verified:true },
+  ],
+  entrepreneurs: [
+    { id:'e1', name:'Patrick Loubaki', startup:'CongoPay', sector:'Fintech', stage:'Croissance', pitch:'Solution de paiement mobile multi-opérateurs pour le Congo. Compatible MTN, Airtel, Orange Money. +50 000 utilisateurs actifs.', city:'Brazzaville', avatar:'PL', funding:'500K USD levés', seeking:false, personId:'p6' },
+    { id:'e2', name:'Alvine Moutsila', startup:'FarmConnect CG', sector:'AgriTech', stage:'MVP', pitch:'Plateforme B2B mettant en relation les agriculteurs du Pool et les acheteurs grossistes de Brazzaville. Réduit les intermédiaires de 60%.', city:'Brazzaville', avatar:'AM', funding:'Recherche 100K USD', seeking:true },
+    { id:'e3', name:'Joël Nkaya', startup:'MedCongo', sector:'HealthTech', stage:'Seed', pitch:'Application de télémédecine avec IA pour le diagnostic préliminaire. 1ère plateforme de santé numérique au Congo. 1 200 consultations/mois.', city:'Brazzaville', avatar:'JN', funding:'150K USD levés', seeking:false },
+    { id:'e4', name:'Stéphanie Bouanga', startup:'EduNum Congo', sector:'EdTech', stage:'MVP', pitch:'Plateforme de cours en ligne en français adaptée aux programmes congolais. Pour collégiens et lycéens. Fonctionne hors-ligne.', city:'Pointe-Noire', avatar:'SB', funding:'Recherche 80K USD', seeking:true },
+    { id:'e5', name:'Léandre Moussoki', startup:'TrackCG', sector:'Logistique & Tech', stage:'Croissance', pitch:'GPS tracking et gestion de flotte pour entreprises congolaises. API intégrable. 35 clients B2B actifs. +500 véhicules suivis.', city:'Brazzaville', avatar:'LM', funding:'300K USD levés', seeking:false },
+    { id:'e6', name:'Fabiola Kiminou', startup:'CongoJob', sector:'RH & Recrutement', stage:'Lancement', pitch:'1ère plateforme d\'emploi vérifiée au Congo. CV en ligne, alertes offres par secteur, vérification employeurs, matching IA.', city:'Brazzaville', avatar:'FK', funding:'Recherche 50K USD', seeking:true },
+    { id:'e7', name:'Aristide Mabika', startup:'Solar Congo', sector:'Énergie Verte', stage:'Seed', pitch:'Kits solaires en location-vente pour ménages sans électricité. 5 000 FCFA/mois seulement. 200 foyers déjà équipés à Dolisie.', city:'Dolisie', avatar:'AR', funding:'200K USD levés', seeking:true },
+    { id:'e8', name:'Vanessa Tsika', startup:'BeautyAfrica', sector:'E-commerce', stage:'Croissance', pitch:'Marketplace de produits de beauté africains naturels. Livraison 24h à Brazzaville. Présente dans 5 pays d\'Afrique centrale.', city:'Brazzaville', avatar:'VT', funding:'Autofinancé', seeking:false },
   ],
 };
 
@@ -223,6 +288,23 @@ function mockRoute(method, path, body) {
     return {success:true,data:{totalCompanies:companies.length,totalUsers:users.length,totalNews:news.length,totalSectors:MOCK.sectors.length}};
   }
 
+  // PEOPLE
+  if (resource === 'people') {
+    const people = mockDB('people', MOCK.people);
+    if (method==='GET'&&!id) return {success:true,data:people};
+    if (method==='GET'&&id) { const p=people.find(x=>x.id===id); return p?{success:true,data:p}:{success:false,error:'Introuvable'}; }
+  }
+
+  // UNIVERSITIES
+  if (resource === 'universities') {
+    if (method==='GET') return {success:true,data:MOCK.universities};
+  }
+
+  // ENTREPRENEURS
+  if (resource === 'entrepreneurs') {
+    if (method==='GET') return {success:true,data:MOCK.entrepreneurs};
+  }
+
   // SUBSCRIPTIONS
   if (resource === 'subscriptions') {
     if (!currentUser) return {success:false,error:'Non authentifié'};
@@ -301,10 +383,14 @@ function companyCard(c) {
     <div class="cc-cover"><div class="cc-avatar" style="font-size:28px;background:linear-gradient(135deg,#1E66FF22,#2ED47A22)">${c.cover||c.init}</div></div>
     <div class="cc-body">
       <div class="cc-header">
-        <div><h4 class="cc-name">${c.name}</h4><span class="cc-sector">${c.sector} · ${c.city}</span></div>
+        <div>
+          <h4 class="cc-name">${c.name}${c.verified?'<span style="background:#D1FAE5;color:#065F46;font-size:9px;padding:2px 6px;border-radius:6px;margin-left:6px;font-weight:800">✓ Vérifié</span>':''}</h4>
+          <span class="cc-sector">${c.sector} · ${c.city}${c.country?' · '+c.country:''}</span>
+        </div>
         <button class="fav-btn" onclick="toggleFav(event,${c.id})" data-company-id="${c.id}" style="font-size:18px;background:none;border:none;cursor:pointer;color:#ccc">♡</button>
       </div>
       <p class="cc-services">${(c.services||'').slice(0,90)}…</p>
+      ${c.phone||c.email?`<div style="font-size:11px;color:#6B7280;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap">${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" style="color:#1E66FF;font-weight:600;text-decoration:none">📞 ${c.phone}</a>`:''}${c.email?`<a href="mailto:${c.email}" onclick="event.stopPropagation()" style="color:#1E66FF;font-weight:600;text-decoration:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">✉️ ${c.email}</a>`:''}</div>`:''}
       <div class="cc-actions">
         <button class="btn-sm btn-primary" onclick="event.stopPropagation();openCompany(${c.id})">Voir</button>
         <button class="btn-sm btn-outline" onclick="event.stopPropagation();contactCompany(${c.id})">Contacter</button>
@@ -352,7 +438,18 @@ async function loadHome() {
   }
 }
 
-// ─── EXPLORE ──────────────────────────────────────────────────────
+// ─── EXPLORE — ONGLETS ────────────────────────────────────────────
+function switchExploreTab(tab) {
+  document.querySelectorAll('.et-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.explore-tab-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById('tab-' + tab)?.classList.remove('hidden');
+  if (tab === 'companies') loadExplore();
+  else if (tab === 'people') loadPeople();
+  else if (tab === 'universities') loadUniversities();
+  else if (tab === 'entrepreneurs') loadEntrepreneurs();
+}
+
+// ─── EXPLORE — ENTREPRISES ────────────────────────────────────────
 async function loadExplore(){
   if(companiesAll.length===0){const r=await apiFetch('GET','/companies');if(r.success)companiesAll=r.data;}
   renderExploreList(companiesAll);
@@ -372,8 +469,251 @@ function filterCompanies(){
   if(city)r=r.filter(c=>c.city===city);
   renderExploreList(r);
 }
-function exploreSector(sector){goTo('explore');setTimeout(()=>{const s=document.getElementById('filter-sector');if(s){s.value=sector;filterCompanies();}},100);}
-function handleSearch(q){if(!q||q.trim().length<2)return;goTo('explore');setTimeout(()=>{const i=document.getElementById('explore-search');if(i){i.value=q;filterCompanies();}},100);}
+function exploreSector(sector){goTo('explore');setTimeout(()=>{switchExploreTab('companies');const s=document.getElementById('filter-sector');if(s){s.value=sector;filterCompanies();}},100);}
+function handleSearch(q){if(!q||q.trim().length<2)return;goTo('explore');setTimeout(()=>{switchExploreTab('companies');const i=document.getElementById('explore-search');if(i){i.value=q;filterCompanies();}},100);}
+
+// ─── PERSONNES ────────────────────────────────────────────────────
+let peopleAll = [];
+
+function personCard(p) {
+  const grad = ['linear-gradient(135deg,#1E66FF,#2ED47A)','linear-gradient(135deg,#7C3AED,#1E66FF)','linear-gradient(135deg,#FF6B35,#F7B500)','linear-gradient(135deg,#2ED47A,#1E66FF)'][p.id.charCodeAt(1)%4];
+  return `<div class="person-card" onclick="openPersonProfile('${p.id}')">
+    <div class="pc-avatar" style="background:${grad}">${p.avatar}</div>
+    <div class="pc-body">
+      <div class="pc-name">${p.name}${p.isEntrepreneur?'<span class="pc-entrepreneur-badge">🚀</span>':''}</div>
+      <div class="pc-role">${p.profession}</div>
+      <div class="pc-location">📍 ${p.city}, ${p.country}</div>
+      <p class="pc-bio">${(p.bio||'').slice(0,85)}…</p>
+      <div class="pc-skills">${(p.skills||[]).slice(0,3).map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>
+      <div class="pc-footer">
+        <span class="pc-connections">👥 ${p.connections} connexions</span>
+        <button class="btn-sm btn-primary" onclick="event.stopPropagation();connectPerson('${p.id}')">+ Connecter</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadPeople() {
+  const list = document.getElementById('people-list'); if (!list) return;
+  if (peopleAll.length === 0) {
+    list.innerHTML = skeletonNewsCards(4);
+    const r = await apiFetch('GET', '/people');
+    if (r.success) peopleAll = r.data;
+  }
+  renderPeople(peopleAll);
+}
+
+function renderPeople(data) {
+  const list = document.getElementById('people-list'); if (!list) return;
+  list.innerHTML = data.length ? data.map(p => personCard(p)).join('')
+    : '<div class="empty-state">Aucune personne trouvée</div>';
+}
+
+function filterPeople() {
+  const q = (document.getElementById('people-search')?.value||'').toLowerCase();
+  if (!q) { renderPeople(peopleAll); return; }
+  renderPeople(peopleAll.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    (p.profession||'').toLowerCase().includes(q) ||
+    (p.city||'').toLowerCase().includes(q) ||
+    (p.skills||[]).some(s => s.toLowerCase().includes(q))
+  ));
+}
+
+async function connectPerson(personId) {
+  if (!token) { showToast('Connectez-vous pour contacter', 'error'); return goTo('login'); }
+  showToast('Demande de connexion envoyée ! ✓', 'success');
+}
+
+function openPersonProfile(personId) {
+  const p = peopleAll.find(x => x.id === personId) || MOCK.people.find(x => x.id === personId);
+  if (!p) return;
+  goTo('company');
+  const page = document.getElementById('page-company');
+  page.querySelector('.company-detail')?.remove();
+  const div = document.createElement('div'); div.className = 'company-detail'; div.style.padding = '20px';
+  const grad = ['linear-gradient(135deg,#1E66FF,#2ED47A)','linear-gradient(135deg,#7C3AED,#1E66FF)','linear-gradient(135deg,#FF6B35,#F7B500)','linear-gradient(135deg,#2ED47A,#1E66FF)'][p.id.charCodeAt(1)%4];
+  div.innerHTML = `
+    <div style="text-align:center;padding:28px;background:linear-gradient(135deg,#1E66FF08,#2ED47A08);border-radius:20px;margin-bottom:16px">
+      <div style="width:80px;height:80px;border-radius:50%;${grad.replace('linear-gradient','background:linear-gradient')};color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;margin:0 auto 14px">${p.avatar}</div>
+      <h2 style="font-size:22px;font-weight:800;color:#0D1931">${p.name}${p.isEntrepreneur?' 🚀':''}</h2>
+      <div style="color:#1E66FF;font-weight:700;margin-top:4px">${p.profession}</div>
+      <div style="color:#6B7280;font-size:13px;margin-top:4px">📍 ${p.city}, ${p.country}</div>
+      <div style="margin-top:14px;display:flex;gap:20px;justify-content:center">
+        <div style="text-align:center"><strong style="display:block;font-size:20px;color:#0D1931">${p.connections}</strong><span style="font-size:11px;color:#6B7280">Connexions</span></div>
+      </div>
+    </div>
+    ${p.bio?`<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px"><h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">À propos</h4><p style="font-size:13px;color:#4B5563;line-height:1.6">${p.bio}</p></div>`:''}
+    ${p.skills?.length?`<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px"><h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:10px">Compétences</h4><div style="display:flex;flex-wrap:wrap;gap:8px">${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div></div>`:''}
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" onclick="connectPerson('${p.id}')" style="flex:2">✉️ Contacter</button>
+      <button class="btn-outline" onclick="showToast('Profil partagé !')" style="flex:1">↗ Partager</button>
+    </div>`;
+  page.appendChild(div);
+}
+
+// ─── UNIVERSITÉS ──────────────────────────────────────────────────
+let universitiesAll = [];
+
+function universityCard(u) {
+  return `<div class="uni-card" onclick="openUniversity('${u.id}')">
+    <div class="uc-header">
+      <div class="uc-icon">${u.cover}</div>
+      <div style="flex:1">
+        ${u.verified?'<span class="uc-badge verified">✓ Vérifiée</span>':''}
+        <div class="uc-type">${u.type}</div>
+      </div>
+    </div>
+    <h4 class="uc-name">${u.name}</h4>
+    <div class="uc-location">📍 ${u.city} · ${u.country}</div>
+    <div class="uc-meta">
+      <span>🎓 ${u.students} étudiants</span>
+      <span>📅 Fondée en ${u.founded}</span>
+    </div>
+    <div class="uc-faculties">${u.faculties.slice(0,3).map(f=>`<span class="skill-tag">${f}</span>`).join('')}${u.faculties.length>3?`<span class="skill-tag">+${u.faculties.length-3} filières</span>`:''}</div>
+    <div class="uc-actions">
+      <button class="btn-sm btn-primary" onclick="event.stopPropagation();openUniversity('${u.id}')">Voir détails</button>
+      ${u.phone?`<button class="btn-sm btn-outline" onclick="event.stopPropagation();window.open('tel:${u.phone}')">📞 Appeler</button>`:''}
+    </div>
+  </div>`;
+}
+
+async function loadUniversities() {
+  const list = document.getElementById('universities-list'); if (!list) return;
+  if (universitiesAll.length === 0) {
+    list.innerHTML = skeletonNewsCards(3);
+    const r = await apiFetch('GET', '/universities');
+    if (r.success) universitiesAll = r.data;
+  }
+  renderUniversities(universitiesAll);
+}
+
+function renderUniversities(data) {
+  const list = document.getElementById('universities-list'); if (!list) return;
+  list.innerHTML = data.length ? data.map(u => universityCard(u)).join('')
+    : '<div class="empty-state">Aucune université trouvée</div>';
+}
+
+function filterUniversities() {
+  const q = (document.getElementById('uni-search')?.value||'').toLowerCase();
+  const country = document.getElementById('filter-uni-country')?.value||'';
+  const type = document.getElementById('filter-uni-type')?.value||'';
+  let data = universitiesAll;
+  if (q) data = data.filter(u => u.name.toLowerCase().includes(q)||(u.city||'').toLowerCase().includes(q)||(u.faculties||[]).some(f=>f.toLowerCase().includes(q)));
+  if (country) data = data.filter(u => u.country.toLowerCase().includes(country.toLowerCase()));
+  if (type) data = data.filter(u => u.type === type);
+  renderUniversities(data);
+}
+
+function openUniversity(univId) {
+  const u = universitiesAll.find(x=>x.id===univId)||MOCK.universities.find(x=>x.id===univId);
+  if (!u) return;
+  goTo('company');
+  const page = document.getElementById('page-company');
+  page.querySelector('.company-detail')?.remove();
+  const div = document.createElement('div'); div.className='company-detail'; div.style.padding='20px';
+  div.innerHTML = `
+    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,#1E66FF11,#2ED47A11);border-radius:16px;margin-bottom:16px">
+      <div style="font-size:56px;margin-bottom:10px">${u.cover}</div>
+      <h2 style="font-size:18px;font-weight:800;color:#0D1931;line-height:1.3">${u.name}</h2>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+        <span style="background:#1E66FF22;color:#1E66FF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${u.type}</span>
+        <span style="background:#f3f4f6;color:#6B7280;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${u.city} · ${u.country}</span>
+        ${u.verified?'<span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">✓ Vérifiée</span>':''}
+      </div>
+      <div style="display:flex;gap:20px;justify-content:center;margin-top:14px">
+        <div><strong style="display:block;font-size:16px;color:#0D1931">${u.founded}</strong><span style="font-size:11px;color:#6B7280">Fondée</span></div>
+        <div><strong style="display:block;font-size:16px;color:#0D1931">${u.students}</strong><span style="font-size:11px;color:#6B7280">Étudiants</span></div>
+        <div><strong style="display:block;font-size:16px;color:#0D1931">${u.faculties.length}</strong><span style="font-size:11px;color:#6B7280">Facultés</span></div>
+      </div>
+    </div>
+    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
+      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:10px">Facultés & Filières</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${u.faculties.map(f=>`<span class="skill-tag">${f}</span>`).join('')}</div>
+    </div>
+    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px">
+      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Contact & Localisation</h4>
+      <div style="font-size:13px;color:#4B5563;line-height:1.9">
+        📍 ${u.address}<br/>
+        ${u.phone?`📞 <a href="tel:${u.phone}" style="color:#1E66FF;font-weight:600">${u.phone}</a><br/>`:''}
+        ${u.email?`✉️ <a href="mailto:${u.email}" style="color:#1E66FF;font-weight:600">${u.email}</a>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      ${u.phone?`<button class="btn-primary" onclick="window.open('tel:${u.phone}')" style="flex:1">📞 Appeler</button>`:''}
+      ${u.email?`<button class="btn-outline" onclick="window.open('mailto:${u.email}')" style="flex:1">✉️ Email</button>`:''}
+      <button class="btn-outline" onclick="showToast('Lien copié !')" style="flex:1">↗ Partager</button>
+    </div>`;
+  page.appendChild(div);
+}
+
+// ─── HUB ENTREPRENEURS ────────────────────────────────────────────
+let entrepreneursAll = [];
+
+const STAGE_STYLE = {
+  'Idée':     {bg:'#F3F4F6',fg:'#6B7280'},
+  'MVP':      {bg:'#FEF3C7',fg:'#92400E'},
+  'Lancement':{bg:'#DBEAFE',fg:'#1E40AF'},
+  'Seed':     {bg:'#D1FAE5',fg:'#065F46'},
+  'Croissance':{bg:'#EDE9FE',fg:'#6D28D9'},
+};
+
+function entrepreneurCard(e) {
+  const s = STAGE_STYLE[e.stage]||{bg:'#F3F4F6',fg:'#6B7280'};
+  return `<div class="ent-card">
+    <div class="ec-header">
+      <div class="ec-avatar">${e.avatar}</div>
+      <div style="flex:1;min-width:0">
+        <div class="ec-name">${e.name}</div>
+        <div class="ec-startup">🚀 ${e.startup}</div>
+      </div>
+      <span class="ec-stage" style="background:${s.bg};color:${s.fg}">${e.stage}</span>
+    </div>
+    <div class="ec-sector">🏷️ ${e.sector} &nbsp;·&nbsp; 📍 ${e.city}</div>
+    <p class="ec-pitch">${e.pitch}</p>
+    <div class="ec-footer">
+      <span class="ec-funding">💰 ${e.funding}</span>
+      ${e.seeking?'<span class="ec-seeking">🎯 Cherche investisseur</span>':'<span style="color:#2ED47A;font-size:11px;font-weight:700">✓ Financé</span>'}
+    </div>
+    <div class="ec-actions">
+      <button class="btn-sm btn-primary" onclick="event.stopPropagation();contactEntrepreneur('${e.id}')">✉️ Contacter</button>
+      <button class="btn-sm btn-outline" onclick="event.stopPropagation();showToast('Profil partagé !')">↗ Partager</button>
+    </div>
+  </div>`;
+}
+
+async function loadEntrepreneurs() {
+  const list = document.getElementById('entrepreneurs-list'); if (!list) return;
+  if (entrepreneursAll.length === 0) {
+    list.innerHTML = skeletonNewsCards(3);
+    const r = await apiFetch('GET', '/entrepreneurs');
+    if (r.success) entrepreneursAll = r.data;
+  }
+  renderEntrepreneurs(entrepreneursAll);
+}
+
+function renderEntrepreneurs(data) {
+  const list = document.getElementById('entrepreneurs-list'); if (!list) return;
+  list.innerHTML = data.length ? data.map(e => entrepreneurCard(e)).join('')
+    : '<div class="empty-state">Aucun entrepreneur trouvé</div>';
+}
+
+function filterEntrepreneurs() {
+  const q = (document.getElementById('ent-search')?.value||'').toLowerCase();
+  const sector = document.getElementById('filter-ent-sector')?.value||'';
+  const stage = document.getElementById('filter-ent-stage')?.value||'';
+  let data = entrepreneursAll;
+  if (q) data = data.filter(e => e.name.toLowerCase().includes(q)||e.startup.toLowerCase().includes(q)||e.pitch.toLowerCase().includes(q));
+  if (sector) data = data.filter(e => e.sector === sector);
+  if (stage) data = data.filter(e => e.stage === stage);
+  renderEntrepreneurs(data);
+}
+
+function contactEntrepreneur(entId) {
+  if (!token) { showToast('Connectez-vous pour contacter', 'error'); return goTo('login'); }
+  const e = entrepreneursAll.find(x=>x.id===entId)||MOCK.entrepreneurs.find(x=>x.id===entId);
+  showToast(`Message envoyé à ${e?.name||'l\'entrepreneur'} !`, 'success');
+}
 
 // ─── FICHE ENTREPRISE ─────────────────────────────────────────────
 async function openCompany(id){
@@ -387,14 +727,23 @@ async function openCompany(id){
   div.style.padding='20px';
   div.innerHTML=`
     <div style="text-align:center;padding:24px;background:linear-gradient(135deg,#1E66FF11,#2ED47A11);border-radius:16px;margin-bottom:16px">
-      <div style="font-size:64px;margin-bottom:8px">${c.cover||c.init}</div>
+      <div style="font-size:56px;margin-bottom:8px">${c.cover||c.init}</div>
       <h2 style="font-size:20px;font-weight:800;color:#0D1931">${c.name}</h2>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
         <span style="background:#1E66FF22;color:#1E66FF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${c.sector}</span>
-        <span style="background:#f3f4f6;color:#6B7280;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${c.city}</span>
+        <span style="background:#f3f4f6;color:#6B7280;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${c.city}${c.country?' · '+c.country:''}</span>
+        ${c.verified?'<span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">✓ Vérifié</span>':''}
       </div>
       ${c.address?`<div style="margin-top:8px;font-size:12px;color:#6B7280">🏢 ${c.address}</div>`:''}
     </div>
+    ${c.phone||c.email||c.website?`<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
+      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:10px">Contact</h4>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+        ${c.phone?`<a href="tel:${c.phone}" style="color:#1E66FF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">📞 ${c.phone}</a>`:''}
+        ${c.email?`<a href="mailto:${c.email}" style="color:#1E66FF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">✉️ ${c.email}</a>`:''}
+        ${c.website?`<a href="https://${c.website}" target="_blank" style="color:#1E66FF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">🌐 ${c.website}</a>`:''}
+      </div>
+    </div>`:''}
     <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
       <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Nos Services</h4>
       <p style="font-size:13px;color:#4B5563;line-height:1.6">${c.services||'Non renseigné'}</p>
