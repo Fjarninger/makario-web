@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚠️ Après déploiement Railway, remplace l'URL ci-dessous par la tienne
-const RAILWAY_URL  = 'https://REMPLACER-PAR-TON-URL.railway.app';
+const RAILWAY_URL  = 'https://makario-server.onrender.com';
 
 const _isLocal     = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const SOCKET_URL   = _isLocal ? 'http://localhost:3000' : RAILWAY_URL;
