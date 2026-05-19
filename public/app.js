@@ -834,7 +834,7 @@ async function submitPost(){
 // ─── MESSAGES ─────────────────────────────────────────────────────
 async function loadMessages(){
   const list=document.getElementById('conv-list-inner');if(!list)return;
-  if(!token){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#5F7FA0;margin-bottom:12px">Connectez-vous pour accéder à vos messages</p><button class="btn-primary sm" onclick="goTo('login')">Se connecter</button></div>`;return;}
+  if(!token){return goTo('login');}
   list.innerHTML=Array.from({length:3},()=>`<div class="conv-item skeleton-card"><div class="sk-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk-title"></div><div class="sk-line" style="width:60%"></div></div></div>`).join('');
   const r=await apiFetch('GET','/conversations');
   if(!r.success||r.data.length===0){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#5F7FA0;margin-bottom:12px">Pas encore de conversations</p><button class="btn-outline sm" onclick="goTo('explore')">Trouver des entreprises</button></div>`;return;}
