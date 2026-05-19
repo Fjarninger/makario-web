@@ -3,7 +3,7 @@
    Cache-first pour les assets, network-first pour les données
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'makario-v5';
+const CACHE_NAME = 'makario-v6';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
