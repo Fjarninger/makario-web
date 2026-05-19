@@ -1,12 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
-   MAKARIO — app.js  |  API + Mode démo intégré
-   ═══════════════════════════════════════════════════════════════
-   → Si le backend (node server.js) tourne sur localhost:3000,
-     toutes les données sont persistées en JSON.
-   → Sinon, l'app fonctionne en mode démo avec localStorage.
+   MAKARIO — app.js  v4.0  |  Réseau · Marketplace · Messagerie
+   Afrique Centrale — Congo Brazzaville & Région
    ═══════════════════════════════════════════════════════════════ */
 
-// ⚠️ Après déploiement Railway, remplace l'URL ci-dessous par la tienne
 const RAILWAY_URL  = 'https://makario-server.onrender.com';
 
 const _isLocal     = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -534,17 +530,17 @@ function openPersonProfile(personId) {
   const div = document.createElement('div'); div.className = 'company-detail'; div.style.padding = '20px';
   const grad = ['linear-gradient(135deg,#1E66FF,#2ED47A)','linear-gradient(135deg,#7C3AED,#1E66FF)','linear-gradient(135deg,#FF6B35,#F7B500)','linear-gradient(135deg,#2ED47A,#1E66FF)'][p.id.charCodeAt(1)%4];
   div.innerHTML = `
-    <div style="text-align:center;padding:28px;background:linear-gradient(135deg,#1E66FF08,#2ED47A08);border-radius:20px;margin-bottom:16px">
+    <div style="text-align:center;padding:28px;background:linear-gradient(135deg,rgba(74,142,255,.12),rgba(46,212,122,.08));border-radius:20px;margin-bottom:16px;border:1px solid rgba(255,255,255,.06)">
       <div style="width:80px;height:80px;border-radius:50%;${grad.replace('linear-gradient','background:linear-gradient')};color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;margin:0 auto 14px">${p.avatar}</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0D1931">${p.name}${p.isEntrepreneur?' 🚀':''}</h2>
-      <div style="color:#1E66FF;font-weight:700;margin-top:4px">${p.profession}</div>
-      <div style="color:#6B7280;font-size:13px;margin-top:4px">📍 ${p.city}, ${p.country}</div>
+      <h2 style="font-size:22px;font-weight:800;color:#E0EEFF">${p.name}${p.isEntrepreneur?' 🚀':''}</h2>
+      <div style="color:#4A8EFF;font-weight:700;margin-top:4px">${p.profession}</div>
+      <div style="color:#5F7FA0;font-size:13px;margin-top:4px">📍 ${p.city}, ${p.country}</div>
       <div style="margin-top:14px;display:flex;gap:20px;justify-content:center">
-        <div style="text-align:center"><strong style="display:block;font-size:20px;color:#0D1931">${p.connections}</strong><span style="font-size:11px;color:#6B7280">Connexions</span></div>
+        <div style="text-align:center"><strong style="display:block;font-size:20px;color:#E0EEFF">${p.connections}</strong><span style="font-size:11px;color:#5F7FA0">Connexions</span></div>
       </div>
     </div>
-    ${p.bio?`<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px"><h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">À propos</h4><p style="font-size:13px;color:#4B5563;line-height:1.6">${p.bio}</p></div>`:''}
-    ${p.skills?.length?`<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px"><h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:10px">Compétences</h4><div style="display:flex;flex-wrap:wrap;gap:8px">${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div></div>`:''}
+    ${p.bio?`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:12px"><h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:8px">À propos</h4><p style="font-size:13px;color:#A8C0DC;line-height:1.6">${p.bio}</p></div>`:''}
+    ${p.skills?.length?`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:16px"><h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:10px">Compétences</h4><div style="display:flex;flex-wrap:wrap;gap:8px">${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div></div>`:''}
     <div style="display:flex;gap:10px">
       <button class="btn-primary" onclick="connectPerson('${p.id}')" style="flex:2">✉️ Contacter</button>
       <button class="btn-outline" onclick="showToast('Profil partagé !')" style="flex:1">↗ Partager</button>
@@ -613,30 +609,30 @@ function openUniversity(univId) {
   page.querySelector('.company-detail')?.remove();
   const div = document.createElement('div'); div.className='company-detail'; div.style.padding='20px';
   div.innerHTML = `
-    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,#1E66FF11,#2ED47A11);border-radius:16px;margin-bottom:16px">
+    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,rgba(74,142,255,.12),rgba(46,212,122,.08));border-radius:16px;margin-bottom:16px;border:1px solid rgba(255,255,255,.06)">
       <div style="font-size:56px;margin-bottom:10px">${u.cover}</div>
-      <h2 style="font-size:18px;font-weight:800;color:#0D1931;line-height:1.3">${u.name}</h2>
+      <h2 style="font-size:18px;font-weight:800;color:#E0EEFF;line-height:1.3">${u.name}</h2>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
-        <span style="background:#1E66FF22;color:#1E66FF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${u.type}</span>
-        <span style="background:#f3f4f6;color:#6B7280;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${u.city} · ${u.country}</span>
-        ${u.verified?'<span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">✓ Vérifiée</span>':''}
+        <span style="background:rgba(74,142,255,.15);color:#4A8EFF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${u.type}</span>
+        <span style="background:rgba(255,255,255,.06);color:#5F7FA0;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${u.city} · ${u.country}</span>
+        ${u.verified?'<span style="background:rgba(46,212,122,.15);color:#2ED47A;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">✓ Vérifiée</span>':''}
       </div>
       <div style="display:flex;gap:20px;justify-content:center;margin-top:14px">
-        <div><strong style="display:block;font-size:16px;color:#0D1931">${u.founded}</strong><span style="font-size:11px;color:#6B7280">Fondée</span></div>
-        <div><strong style="display:block;font-size:16px;color:#0D1931">${u.students}</strong><span style="font-size:11px;color:#6B7280">Étudiants</span></div>
-        <div><strong style="display:block;font-size:16px;color:#0D1931">${u.faculties.length}</strong><span style="font-size:11px;color:#6B7280">Facultés</span></div>
+        <div><strong style="display:block;font-size:16px;color:#E0EEFF">${u.founded}</strong><span style="font-size:11px;color:#5F7FA0">Fondée</span></div>
+        <div><strong style="display:block;font-size:16px;color:#E0EEFF">${u.students}</strong><span style="font-size:11px;color:#5F7FA0">Étudiants</span></div>
+        <div><strong style="display:block;font-size:16px;color:#E0EEFF">${u.faculties.length}</strong><span style="font-size:11px;color:#5F7FA0">Facultés</span></div>
       </div>
     </div>
-    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
-      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:10px">Facultés & Filières</h4>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:12px">
+      <h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:10px">Facultés & Filières</h4>
       <div style="display:flex;flex-wrap:wrap;gap:8px">${u.faculties.map(f=>`<span class="skill-tag">${f}</span>`).join('')}</div>
     </div>
-    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px">
-      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Contact & Localisation</h4>
-      <div style="font-size:13px;color:#4B5563;line-height:1.9">
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:16px">
+      <h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:8px">Contact & Localisation</h4>
+      <div style="font-size:13px;color:#A8C0DC;line-height:1.9">
         📍 ${u.address}<br/>
-        ${u.phone?`📞 <a href="tel:${u.phone}" style="color:#1E66FF;font-weight:600">${u.phone}</a><br/>`:''}
-        ${u.email?`✉️ <a href="mailto:${u.email}" style="color:#1E66FF;font-weight:600">${u.email}</a>`:''}
+        ${u.phone?`📞 <a href="tel:${u.phone}" style="color:#4A8EFF;font-weight:600">${u.phone}</a><br/>`:''}
+        ${u.email?`✉️ <a href="mailto:${u.email}" style="color:#4A8EFF;font-weight:600">${u.email}</a>`:''}
       </div>
     </div>
     <div style="display:flex;gap:10px">
@@ -726,31 +722,31 @@ async function openCompany(id){
   const div=document.createElement('div');div.className='company-detail';
   div.style.padding='20px';
   div.innerHTML=`
-    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,#1E66FF11,#2ED47A11);border-radius:16px;margin-bottom:16px">
+    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,rgba(74,142,255,.12),rgba(46,212,122,.08));border-radius:16px;margin-bottom:16px;border:1px solid rgba(255,255,255,.06)">
       <div style="font-size:56px;margin-bottom:8px">${c.cover||c.init}</div>
-      <h2 style="font-size:20px;font-weight:800;color:#0D1931">${c.name}</h2>
+      <h2 style="font-size:20px;font-weight:800;color:#E0EEFF">${c.name}</h2>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
-        <span style="background:#1E66FF22;color:#1E66FF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${c.sector}</span>
-        <span style="background:#f3f4f6;color:#6B7280;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${c.city}${c.country?' · '+c.country:''}</span>
-        ${c.verified?'<span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">✓ Vérifié</span>':''}
+        <span style="background:rgba(74,142,255,.15);color:#4A8EFF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${c.sector}</span>
+        <span style="background:rgba(255,255,255,.06);color:#5F7FA0;padding:4px 12px;border-radius:20px;font-size:12px">📍 ${c.city}${c.country?' · '+c.country:''}</span>
+        ${c.verified?'<span style="background:rgba(46,212,122,.15);color:#2ED47A;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">✓ Vérifié</span>':''}
       </div>
-      ${c.address?`<div style="margin-top:8px;font-size:12px;color:#6B7280">🏢 ${c.address}</div>`:''}
+      ${c.address?`<div style="margin-top:8px;font-size:12px;color:#5F7FA0">🏢 ${c.address}</div>`:''}
     </div>
-    ${c.phone||c.email||c.website?`<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
-      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:10px">Contact</h4>
+    ${c.phone||c.email||c.website?`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:12px">
+      <h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:10px">Contact</h4>
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
-        ${c.phone?`<a href="tel:${c.phone}" style="color:#1E66FF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">📞 ${c.phone}</a>`:''}
-        ${c.email?`<a href="mailto:${c.email}" style="color:#1E66FF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">✉️ ${c.email}</a>`:''}
-        ${c.website?`<a href="https://${c.website}" target="_blank" style="color:#1E66FF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">🌐 ${c.website}</a>`:''}
+        ${c.phone?`<a href="tel:${c.phone}" style="color:#4A8EFF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">📞 ${c.phone}</a>`:''}
+        ${c.email?`<a href="mailto:${c.email}" style="color:#4A8EFF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">✉️ ${c.email}</a>`:''}
+        ${c.website?`<a href="https://${c.website}" target="_blank" style="color:#4A8EFF;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:6px">🌐 ${c.website}</a>`:''}
       </div>
     </div>`:''}
-    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px">
-      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Nos Services</h4>
-      <p style="font-size:13px;color:#4B5563;line-height:1.6">${c.services||'Non renseigné'}</p>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:12px">
+      <h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:8px">Nos Services</h4>
+      <p style="font-size:13px;color:#A8C0DC;line-height:1.6">${c.services||'Non renseigné'}</p>
     </div>
-    <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:16px">
-      <h4 style="font-size:13px;font-weight:800;color:#0D1931;margin-bottom:8px">Notre Vision</h4>
-      <p style="font-size:13px;color:#4B5563;line-height:1.6">${c.vision||'Non renseigné'}</p>
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;margin-bottom:16px">
+      <h4 style="font-size:13px;font-weight:800;color:#E0EEFF;margin-bottom:8px">Notre Vision</h4>
+      <p style="font-size:13px;color:#A8C0DC;line-height:1.6">${c.vision||'Non renseigné'}</p>
     </div>
     <div style="display:flex;gap:10px">
       <button class="btn-primary" onclick="contactCompany(${c.id})" style="flex:2">✉️ Contacter</button>
@@ -790,19 +786,19 @@ function showPublishModal(){
   if(!token){showToast('Connectez-vous pour publier','error');return goTo('login');}
   _pubImageUrl=null;
   let m=document.getElementById('publish-modal');
-  if(!m){m=document.createElement('div');m.id='publish-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:flex-end;justify-content:center';m.addEventListener('click',e=>{if(e.target===m)m.remove();});document.body.appendChild(m);}
-  m.innerHTML=`<div style="background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:24px;max-height:90vh;overflow-y:auto">
-    <h3 style="margin-bottom:16px;font-size:18px">Nouvelle publication</h3>
-    <input id="pub-title" placeholder="Titre de votre publication…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:14px;box-sizing:border-box"/>
-    <textarea id="pub-body" placeholder="Décrivez votre offre, actualité…" rows="4" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+  if(!m){m=document.createElement('div');m.id='publish-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:flex-end;justify-content:center';m.addEventListener('click',e=>{if(e.target===m)m.remove();});document.body.appendChild(m);}
+  m.innerHTML=`<div style="background:#080F1A;border:1px solid rgba(255,255,255,.08);border-bottom:none;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:24px;max-height:90vh;overflow-y:auto">
+    <h3 style="margin-bottom:16px;font-size:18px;color:#E0EEFF">Nouvelle publication</h3>
+    <input id="pub-title" placeholder="Titre de votre publication…" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:14px;box-sizing:border-box"/>
+    <textarea id="pub-body" placeholder="Décrivez votre offre, actualité…" rows="4" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
     <div id="pub-img-preview" style="display:none;margin-bottom:10px;border-radius:12px;overflow:hidden;position:relative">
       <img id="pub-img-tag" style="width:100%;max-height:180px;object-fit:cover;display:block"/>
-      <button onclick="_pubImageUrl=null;document.getElementById('pub-img-preview').style.display='none'" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px">✕</button>
+      <button onclick="_pubImageUrl=null;document.getElementById('pub-img-preview').style.display='none'" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px">✕</button>
     </div>
-    <button onclick="_selectPubImage()" style="width:100%;border:1.5px dashed #d1d5db;border-radius:10px;padding:12px;background:#f9fafb;cursor:pointer;color:#6B7280;font-size:13px;margin-bottom:14px">📷 Ajouter une image</button>
+    <button onclick="_selectPubImage()" style="width:100%;border:1.5px dashed rgba(255,255,255,.15);border-radius:10px;padding:12px;background:rgba(255,255,255,.04);cursor:pointer;color:#5F7FA0;font-size:13px;margin-bottom:14px">📷 Ajouter une image</button>
     <div style="display:flex;gap:10px">
-      <button onclick="document.getElementById('publish-modal').remove()" style="flex:1;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer">Annuler</button>
-      <button onclick="submitPost()" style="flex:2;padding:12px;background:#1E66FF;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">📢 Publier</button>
+      <button onclick="document.getElementById('publish-modal').remove()" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);cursor:pointer;color:#A8C0DC">Annuler</button>
+      <button onclick="submitPost()" style="flex:2;padding:12px;background:linear-gradient(135deg,#4A8EFF,#2D6FFF);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">📢 Publier</button>
     </div>
   </div>`;
 }
@@ -838,10 +834,10 @@ async function submitPost(){
 // ─── MESSAGES ─────────────────────────────────────────────────────
 async function loadMessages(){
   const list=document.getElementById('conv-list-inner');if(!list)return;
-  if(!token){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#6B7280;margin-bottom:12px">Connectez-vous pour accéder à vos messages</p><button class="btn-primary sm" onclick="goTo('login')">Se connecter</button></div>`;return;}
+  if(!token){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#5F7FA0;margin-bottom:12px">Connectez-vous pour accéder à vos messages</p><button class="btn-primary sm" onclick="goTo('login')">Se connecter</button></div>`;return;}
   list.innerHTML=Array.from({length:3},()=>`<div class="conv-item skeleton-card"><div class="sk-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk-title"></div><div class="sk-line" style="width:60%"></div></div></div>`).join('');
   const r=await apiFetch('GET','/conversations');
-  if(!r.success||r.data.length===0){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#6B7280;margin-bottom:12px">Pas encore de conversations</p><button class="btn-outline sm" onclick="goTo('explore')">Trouver des entreprises</button></div>`;return;}
+  if(!r.success||r.data.length===0){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#5F7FA0;margin-bottom:12px">Pas encore de conversations</p><button class="btn-outline sm" onclick="goTo('explore')">Trouver des entreprises</button></div>`;return;}
   list.innerHTML=r.data.map(c=>`<div class="conv-item" onclick="openConv(${c.id},'${c.name}','${c.init||c.name?.slice(0,2)||'?'}')">
     <div class="ci-avatar">${c.init||c.name?.slice(0,2)||'?'}</div>
     <div class="ci-body"><div class="ci-top"><strong>${c.name||'Conversation'}</strong><span class="ci-time">${c.time||''}</span></div>
@@ -855,22 +851,22 @@ async function openConv(convId,name,initials){
   currentConvId=convId;
   const win=document.getElementById('chat-window');if(!win)return;
   win.innerHTML=`
-    <div class="chat-header" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f3f4f6">
-      <button onclick="currentConvId=null" style="background:none;border:none;cursor:pointer;color:#6B7280;font-size:18px">←</button>
-      <div style="width:36px;height:36px;border-radius:50%;background:#1E66FF;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">${initials}</div>
-      <strong style="font-size:14px">${name}</strong>
+    <div class="chat-header" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <button onclick="currentConvId=null" style="background:none;border:none;cursor:pointer;color:#A8C0DC;font-size:18px">←</button>
+      <div style="width:36px;height:36px;border-radius:50%;background:#4A8EFF;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">${initials}</div>
+      <strong style="font-size:14px;color:#E0EEFF">${name}</strong>
     </div>
-    <div class="chat-messages" id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="text-align:center;color:#6B7280">Chargement…</div></div>
-    <div class="chat-input-bar" style="display:flex;gap:8px;padding:12px;border-top:1px solid #f3f4f6">
-      <input id="chat-input" placeholder="Écrire un message…" onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1;border:1px solid #e5e7eb;border-radius:24px;padding:10px 16px;font-size:14px"/>
-      <button onclick="sendMessage()" style="width:40px;height:40px;border-radius:50%;background:#1E66FF;border:none;cursor:pointer;color:#fff;font-size:18px">➤</button>
+    <div class="chat-messages" id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="text-align:center;color:#5F7FA0">Chargement…</div></div>
+    <div class="chat-input-bar" style="display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.08)">
+      <input id="chat-input" placeholder="Écrire un message…" onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:24px;padding:10px 16px;font-size:14px"/>
+      <button onclick="sendMessage()" style="width:40px;height:40px;border-radius:50%;background:#4A8EFF;border:none;cursor:pointer;color:#fff;font-size:18px">➤</button>
     </div>`;
   const r=await apiFetch('GET',`/conversations/${convId}/messages`);
   const msgs=document.getElementById('chat-messages');if(!msgs)return;
   msgs.innerHTML=r.success&&r.data.length>0?r.data.map(m=>`<div style="align-self:${m.sent?'flex-end':'flex-start'};max-width:75%">
-    <div style="background:${m.sent?'#1E66FF':'#f3f4f6'};color:${m.sent?'#fff':'#0D1931'};padding:10px 14px;border-radius:${m.sent?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:14px">${m.text}</div>
-    <div style="font-size:10px;color:#9CA3AF;margin-top:3px;text-align:${m.sent?'right':'left'}">${formatTime(m.date)}</div>
-  </div>`).join(''):'<div style="text-align:center;color:#6B7280;padding:20px">Démarrez la conversation !</div>';
+    <div style="background:${m.sent?'#4A8EFF':'rgba(255,255,255,.07)'};color:#fff;padding:10px 14px;border-radius:${m.sent?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:14px">${m.text}</div>
+    <div style="font-size:10px;color:#5F7FA0;margin-top:3px;text-align:${m.sent?'right':'left'}">${formatTime(m.date)}</div>
+  </div>`).join(''):'<div style="text-align:center;color:#5F7FA0;padding:20px">Démarrez la conversation !</div>';
   msgs.scrollTop=msgs.scrollHeight;
 }
 
@@ -878,7 +874,7 @@ async function sendMessage(){
   const input=document.getElementById('chat-input');if(!input||!currentConvId)return;
   const text=input.value.trim();if(!text)return;input.value='';
   const r=await apiFetch('POST',`/conversations/${currentConvId}/messages`,{text});
-  if(r.success){const msgs=document.getElementById('chat-messages');if(msgs){const b=document.createElement('div');b.style.cssText='align-self:flex-end;max-width:75%';b.innerHTML=`<div style="background:#1E66FF;color:#fff;padding:10px 14px;border-radius:18px 18px 4px 18px;font-size:14px">${text}</div><div style="font-size:10px;color:#9CA3AF;margin-top:3px;text-align:right">À l'instant</div>`;msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;}}
+  if(r.success){const msgs=document.getElementById('chat-messages');if(msgs){const b=document.createElement('div');b.style.cssText='align-self:flex-end;max-width:75%';b.innerHTML=`<div style="background:#4A8EFF;color:#fff;padding:10px 14px;border-radius:18px 18px 4px 18px;font-size:14px">${text}</div><div style="font-size:10px;color:#5F7FA0;margin-top:3px;text-align:right">À l'instant</div>`;msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;}}
   else showToast(r.error||'Erreur','error');
 }
 
@@ -976,15 +972,15 @@ function showEditProfileModal(){
   const u=currentUser||{};
   const parts=(u.name||'').split(' ');
   const fn=parts[0]||'';const ln=parts.slice(1).join(' ')||'';
-  m.innerHTML=`<div style="background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:24px">
-    <h3 style="margin-bottom:16px;font-size:18px">Modifier le profil</h3>
+  m.innerHTML=`<div style="background:#080F1A;border:1px solid rgba(255,255,255,.08);border-bottom:none;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:24px">
+    <h3 style="margin-bottom:16px;font-size:18px;color:#E0EEFF">Modifier le profil</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">PRÉNOM</label><input id="ep-firstname" value="${fn}" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
-      <div><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NOM</label><input id="ep-lastname" value="${ln}" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">PRÉNOM</label><input id="ep-firstname" value="${fn}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NOM</label><input id="ep-lastname" value="${ln}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
     </div>
-    <div style="margin-bottom:10px"><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">PROFESSION</label><input id="ep-profession" value="${u.profession||''}" placeholder="Chef d'entreprise, Développeur…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
-    <div style="margin-bottom:16px"><label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">VILLE</label>
-      <select id="ep-city" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box">
+    <div style="margin-bottom:10px"><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">PROFESSION</label><input id="ep-profession" value="${u.profession||''}" placeholder="Chef d'entreprise, Développeur…" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+    <div style="margin-bottom:16px"><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">VILLE</label>
+      <select id="ep-city" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:#0B1525;color:#A8C0DC;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box">
         <option value="">Sélectionner</option>
         <option${u.city==='Brazzaville'?' selected':''}>Brazzaville</option>
         <option${u.city==='Pointe-Noire'?' selected':''}>Pointe-Noire</option>
@@ -995,8 +991,8 @@ function showEditProfileModal(){
       </select>
     </div>
     <div style="display:flex;gap:10px">
-      <button onclick="document.getElementById('edit-profile-modal').remove()" style="flex:1;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer">Annuler</button>
-      <button onclick="saveProfile()" style="flex:2;padding:12px;background:#1E66FF;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Enregistrer</button>
+      <button onclick="document.getElementById('edit-profile-modal').remove()" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);cursor:pointer;color:#A8C0DC">Annuler</button>
+      <button onclick="saveProfile()" style="flex:2;padding:12px;background:linear-gradient(135deg,#4A8EFF,#2D6FFF);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Enregistrer</button>
     </div>
   </div>`;
 }
@@ -1031,7 +1027,7 @@ async function loadDashboard(){
   }
   const rNews=await apiFetch('GET','/news');
   const pubFeed=document.getElementById('pub-grid');
-  if(pubFeed&&rNews.success)pubFeed.innerHTML=rNews.data.slice(0,5).map(n=>`<div style="padding:12px;border:1.5px solid #f3f4f6;border-radius:12px;margin-bottom:8px"><div style="font-weight:700;font-size:13px;color:#0D1931;margin-bottom:4px">${n.title}</div><div style="font-size:11px;color:#6B7280">${formatTime(n.date)} · ♥ ${n.likes} · ${(n.comments||[]).length} commentaires</div></div>`).join('')||'<p style="color:#6B7280;padding:10px 0">Aucune publication</p>';
+  if(pubFeed&&rNews.success)pubFeed.innerHTML=rNews.data.slice(0,5).map(n=>`<div style="padding:12px;border:1.5px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:8px;background:rgba(255,255,255,.03)"><div style="font-weight:700;font-size:13px;color:#E0EEFF;margin-bottom:4px">${n.title}</div><div style="font-size:11px;color:#5F7FA0">${formatTime(n.date)} · ♥ ${n.likes} · ${(n.comments||[]).length} commentaires</div></div>`).join('')||'<p style="color:#5F7FA0;padding:10px 0">Aucune publication</p>';
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────
@@ -1074,14 +1070,14 @@ function showPayModal(plan, price) {
   let m = document.getElementById('pay-modal');
   if (!m) {
     m = document.createElement('div'); m.id = 'pay-modal';
-    m.style.cssText = 'position:fixed;inset:0;background:rgba(13,25,49,.7);z-index:2000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px)';
     document.body.appendChild(m);
     m.addEventListener('click', e => { if (e.target === m) m.remove(); });
   }
   m.innerHTML = `
-  <div style="background:#fff;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:0;overflow:hidden;max-height:92vh;overflow-y:auto">
+  <div style="background:#080F1A;border:1px solid rgba(255,255,255,.08);border-bottom:none;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:0;overflow:hidden;max-height:92vh;overflow-y:auto">
     <!-- En-tête -->
-    <div style="background:linear-gradient(135deg,#1E66FF,#2ED47A);padding:24px 24px 20px;color:#fff">
+    <div style="background:linear-gradient(135deg,#4A8EFF,#2ED47A);padding:24px 24px 20px;color:#fff">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div style="font-size:12px;opacity:.8;font-weight:600;letter-spacing:.5px;text-transform:uppercase">Abonnement</div>
@@ -1097,15 +1093,15 @@ function showPayModal(plan, price) {
 
     <div style="padding:20px 20px 32px">
       <!-- Sécurité -->
-      <div style="display:flex;align-items:center;gap:6px;color:#6B7280;font-size:11px;margin-bottom:20px;justify-content:center">
+      <div style="display:flex;align-items:center;gap:6px;color:#5F7FA0;font-size:11px;margin-bottom:20px;justify-content:center">
         🔒 <span>Paiement 100% sécurisé · SSL 256 bits · Données cryptées</span>
       </div>
 
-      <div style="font-size:13px;font-weight:700;color:#0D1931;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Choisissez votre mode de paiement</div>
+      <div style="font-size:13px;font-weight:700;color:#E0EEFF;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Choisissez votre mode de paiement</div>
 
       <!-- ══ CARTES BANCAIRES ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="togglePaySection('card-section')" style="width:100%;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="togglePaySection('card-section')" style="width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#E0EEFF;font-size:14px">
           <div style="display:flex;gap:4px;align-items:center">
             <div style="background:#1A1F71;color:#fff;font-size:9px;font-weight:900;padding:3px 6px;border-radius:4px;letter-spacing:.5px">VISA</div>
             <div style="background:#EB001B;color:#fff;font-size:9px;font-weight:900;padding:3px 6px;border-radius:4px;position:relative">
@@ -1117,28 +1113,28 @@ function showPayModal(plan, price) {
           <span style="flex:1">Carte bancaire</span>
           <span style="font-size:18px;transition:transform .2s" id="chevron-card">▾</span>
         </button>
-        <div id="card-section" style="display:none;background:#fff;border:1.5px solid #1E66FF33;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+        <div id="card-section" style="display:none;background:rgba(255,255,255,.04);border:1.5px solid rgba(74,142,255,.25);border-top:none;border-radius:0 0 14px 14px;padding:16px">
           <div style="display:grid;gap:10px">
             <div>
-              <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO DE CARTE</label>
+              <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NUMÉRO DE CARTE</label>
               <input id="card-num" type="text" placeholder="1234 5678 9012 3456" maxlength="19"
                 oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/(.{4})/g,'$1 ').trim()"
-                style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:15px;box-sizing:border-box;letter-spacing:1px;font-family:monospace"/>
+                style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:15px;box-sizing:border-box;letter-spacing:1px;font-family:monospace"/>
             </div>
             <div>
-              <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NOM SUR LA CARTE</label>
-              <input id="card-name" type="text" placeholder="FELIX NGOMA" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;text-transform:uppercase"/>
+              <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NOM SUR LA CARTE</label>
+              <input id="card-name" type="text" placeholder="FELIX NGOMA" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;text-transform:uppercase"/>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <div>
-                <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">EXPIRATION</label>
+                <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">EXPIRATION</label>
                 <input id="card-exp" type="text" placeholder="MM/AA" maxlength="5"
                   oninput="let v=this.value.replace(/\D/g,'');if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2);this.value=v"
-                  style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;font-family:monospace"/>
+                  style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;font-family:monospace"/>
               </div>
               <div>
-                <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">CVV</label>
-                <input id="card-cvv" type="password" placeholder="•••" maxlength="4" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;font-family:monospace"/>
+                <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">CVV</label>
+                <input id="card-cvv" type="password" placeholder="•••" maxlength="4" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;font-family:monospace"/>
               </div>
             </div>
             <button onclick="processCardPayment('${plan}','${price}')" style="width:100%;background:linear-gradient(135deg,#1E66FF,#1555CC);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px">
@@ -1159,7 +1155,7 @@ function showPayModal(plan, price) {
 
       <!-- ══ GOOGLE PAY / APPLE PAY ══ -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <button onclick="processGooglePay('${plan}','${price}')" style="background:#fff;border:1.5px solid #e5e7eb;border-radius:14px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:#0D1931">
+        <button onclick="processGooglePay('${plan}','${price}')" style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:#E0EEFF">
           <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
           Google Pay
         </button>
@@ -1171,24 +1167,24 @@ function showPayModal(plan, price) {
 
       <!-- ══ SÉPARATEUR ══ -->
       <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
-        <div style="flex:1;height:1px;background:#e5e7eb"></div>
-        <span style="font-size:11px;color:#9CA3AF;font-weight:600">MOBILE MONEY AFRIQUE</span>
-        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
+        <span style="font-size:11px;color:#5F7FA0;font-weight:600">MOBILE MONEY AFRIQUE</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
       </div>
 
       <!-- ══ MTN MOBILE MONEY ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="togglePaySection('mtn-section')" style="width:100%;background:#FFF8E1;border:1.5px solid #FFD54F;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="togglePaySection('mtn-section')" style="width:100%;background:rgba(255,204,0,.08);border:1.5px solid rgba(255,213,79,.4);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#E0EEFF;font-size:14px">
           <div style="width:32px;height:32px;background:#FFCC00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#0D1931">MTN</div>
           <span style="flex:1">MTN Mobile Money</span>
-          <span style="font-size:11px;color:#6B7280">CG · CD · CM · CI · GH…</span>
+          <span style="font-size:11px;color:#5F7FA0">CG · CD · CM · CI · GH…</span>
           <span id="chevron-mtn" style="font-size:18px">▾</span>
         </button>
-        <div id="mtn-section" style="display:none;background:#FFFDF0;border:1.5px solid #FFD54F;border-top:none;border-radius:0 0 14px 14px;padding:16px">
-          <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO MTN MOBILE MONEY</label>
+        <div id="mtn-section" style="display:none;background:rgba(255,204,0,.05);border:1.5px solid rgba(255,213,79,.3);border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NUMÉRO MTN MOBILE MONEY</label>
           <div style="display:flex;gap:8px">
-            <div style="background:#e5e7eb;border-radius:10px;padding:11px 12px;font-size:13px;font-weight:700;white-space:nowrap">🇨🇬 +242</div>
-            <input id="mtn-num" type="tel" placeholder="06 XXX XX XX" style="flex:1;border:1.5px solid #FFD54F;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
+            <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:11px 12px;font-size:13px;font-weight:700;white-space:nowrap;color:#A8C0DC">🇨🇬 +242</div>
+            <input id="mtn-num" type="tel" placeholder="06 XXX XX XX" style="flex:1;border:1.5px solid rgba(255,213,79,.4);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
           </div>
           <button onclick="processMobileMoney('MTN','${plan}','${price}')" style="width:100%;background:#FFCC00;color:#0D1931;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px">
             📱 Payer via MTN MoMo
@@ -1198,17 +1194,17 @@ function showPayModal(plan, price) {
 
       <!-- ══ AIRTEL MONEY ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="togglePaySection('airtel-section')" style="width:100%;background:#FFF0F0;border:1.5px solid #FF8A80;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="togglePaySection('airtel-section')" style="width:100%;background:rgba(255,0,0,.08);border:1.5px solid rgba(255,138,128,.4);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#E0EEFF;font-size:14px">
           <div style="width:32px;height:32px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;color:#fff">AIR</div>
           <span style="flex:1">Airtel Money</span>
-          <span style="font-size:11px;color:#6B7280">CG · CD · RW · ZM…</span>
+          <span style="font-size:11px;color:#5F7FA0">CG · CD · RW · ZM…</span>
           <span id="chevron-airtel" style="font-size:18px">▾</span>
         </button>
-        <div id="airtel-section" style="display:none;background:#FFF8F8;border:1.5px solid #FF8A80;border-top:none;border-radius:0 0 14px 14px;padding:16px">
-          <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO AIRTEL MONEY</label>
+        <div id="airtel-section" style="display:none;background:rgba(255,0,0,.05);border:1.5px solid rgba(255,138,128,.3);border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NUMÉRO AIRTEL MONEY</label>
           <div style="display:flex;gap:8px">
-            <div style="background:#e5e7eb;border-radius:10px;padding:11px 12px;font-size:13px;font-weight:700;white-space:nowrap">🇨🇬 +242</div>
-            <input id="airtel-num" type="tel" placeholder="05 XXX XX XX" style="flex:1;border:1.5px solid #FF8A80;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
+            <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:11px 12px;font-size:13px;font-weight:700;white-space:nowrap;color:#A8C0DC">🇨🇬 +242</div>
+            <input id="airtel-num" type="tel" placeholder="05 XXX XX XX" style="flex:1;border:1.5px solid rgba(255,138,128,.4);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
           </div>
           <button onclick="processMobileMoney('Airtel','${plan}','${price}')" style="width:100%;background:#FF0000;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px">
             📲 Payer via Airtel Money
@@ -1218,23 +1214,23 @@ function showPayModal(plan, price) {
 
       <!-- ══ ORANGE MONEY ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="togglePaySection('orange-section')" style="width:100%;background:#FFF3E0;border:1.5px solid #FFAB40;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="togglePaySection('orange-section')" style="width:100%;background:rgba(255,102,0,.08);border:1.5px solid rgba(255,171,64,.4);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#E0EEFF;font-size:14px">
           <div style="width:32px;height:32px;background:#FF6600;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff">◉</div>
           <span style="flex:1">Orange Money</span>
-          <span style="font-size:11px;color:#6B7280">SN · CI · CM · ML…</span>
+          <span style="font-size:11px;color:#5F7FA0">SN · CI · CM · ML…</span>
           <span id="chevron-orange" style="font-size:18px">▾</span>
         </button>
-        <div id="orange-section" style="display:none;background:#FFFBF5;border:1.5px solid #FFAB40;border-top:none;border-radius:0 0 14px 14px;padding:16px">
-          <label style="font-size:11px;font-weight:700;color:#6B7280;display:block;margin-bottom:5px">NUMÉRO ORANGE MONEY</label>
+        <div id="orange-section" style="display:none;background:rgba(255,102,0,.05);border:1.5px solid rgba(255,171,64,.3);border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NUMÉRO ORANGE MONEY</label>
           <div style="display:flex;gap:8px">
-            <select id="orange-country" style="background:#e5e7eb;border:none;border-radius:10px;padding:11px 10px;font-size:12px;font-weight:700">
+            <select id="orange-country" style="background:#0B1525;border:1px solid rgba(255,255,255,.1);color:#A8C0DC;border-radius:10px;padding:11px 10px;font-size:12px;font-weight:700">
               <option value="+221">🇸🇳 +221</option>
               <option value="+225">🇨🇮 +225</option>
               <option value="+237">🇨🇲 +237</option>
               <option value="+223">🇲🇱 +223</option>
               <option value="+224">🇬🇳 +224</option>
             </select>
-            <input id="orange-num" type="tel" placeholder="7X XXX XX XX" style="flex:1;border:1.5px solid #FFAB40;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
+            <input id="orange-num" type="tel" placeholder="7X XXX XX XX" style="flex:1;border:1.5px solid rgba(255,171,64,.4);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:11px 14px;font-size:15px;font-family:monospace;box-sizing:border-box"/>
           </div>
           <button onclick="processMobileMoney('Orange','${plan}','${price}')" style="width:100%;background:#FF6600;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px">
             🟠 Payer via Orange Money
@@ -1244,37 +1240,37 @@ function showPayModal(plan, price) {
 
       <!-- ══ WAVE ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="processMobileMoney('Wave','${plan}','${price}')" style="width:100%;background:#E8F4FD;border:1.5px solid #29B6F6;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="processMobileMoney('Wave','${plan}','${price}')" style="width:100%;background:rgba(0,180,255,.08);border:1.5px solid rgba(41,182,246,.4);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font-weight:700;color:#E0EEFF;font-size:14px">
           <div style="width:32px;height:32px;background:#00B4FF;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff">〜</div>
           <span style="flex:1">Wave</span>
-          <span style="font-size:11px;color:#6B7280">SN · CI · BF · ML · UG…</span>
+          <span style="font-size:11px;color:#5F7FA0">SN · CI · BF · ML · UG…</span>
         </button>
       </div>
 
       <!-- ══ SÉPARATEUR ══ -->
       <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
-        <div style="flex:1;height:1px;background:#e5e7eb"></div>
-        <span style="font-size:11px;color:#9CA3AF;font-weight:600">AUTRES</span>
-        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
+        <span style="font-size:11px;color:#5F7FA0;font-weight:600">AUTRES</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
       </div>
 
       <!-- ══ VIREMENT BANCAIRE ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="togglePaySection('wire-section')" style="width:100%;background:#F0F4FF;border:1.5px solid #A5B4FC;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="togglePaySection('wire-section')" style="width:100%;background:rgba(165,180,252,.08);border:1.5px solid rgba(165,180,252,.3);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#E0EEFF;font-size:14px">
           <span style="font-size:22px">🏦</span>
           <span style="flex:1">Virement bancaire</span>
           <span id="chevron-wire" style="font-size:18px">▾</span>
         </button>
-        <div id="wire-section" style="display:none;background:#F8F9FF;border:1.5px solid #A5B4FC;border-top:none;border-radius:0 0 14px 14px;padding:16px">
-          <div style="background:#EEF2FF;border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:#0D1931">
-            <div><strong>Banque :</strong> BGFI Bank Congo</div>
-            <div><strong>IBAN :</strong> CG 86 0001 0000 1234 5678 9012 345</div>
-            <div><strong>BIC :</strong> BGFICGCG</div>
-            <div><strong>Bénéficiaire :</strong> MAKARIO SAS</div>
-            <div style="margin-top:8px;font-weight:700;color:#1E66FF"><strong>Référence :</strong> MAK-${plan.toUpperCase()}-${Date.now().toString().slice(-6)}</div>
+        <div id="wire-section" style="display:none;background:rgba(165,180,252,.05);border:1.5px solid rgba(165,180,252,.2);border-top:none;border-radius:0 0 14px 14px;padding:16px">
+          <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:#A8C0DC">
+            <div><strong style="color:#E0EEFF">Banque :</strong> BGFI Bank Congo</div>
+            <div><strong style="color:#E0EEFF">IBAN :</strong> CG 86 0001 0000 1234 5678 9012 345</div>
+            <div><strong style="color:#E0EEFF">BIC :</strong> BGFICGCG</div>
+            <div><strong style="color:#E0EEFF">Bénéficiaire :</strong> MAKARIO SAS</div>
+            <div style="margin-top:8px;font-weight:700;color:#4A8EFF"><strong>Référence :</strong> MAK-${plan.toUpperCase()}-${Date.now().toString().slice(-6)}</div>
           </div>
-          <div style="font-size:11px;color:#6B7280;margin-top:10px;line-height:1.6">⚠️ Votre abonnement sera activé sous 24–48h après réception du virement. Envoyez votre preuve de paiement à <strong>paiements@makario.cg</strong></div>
-          <button onclick="copyWireRef()" style="width:100%;background:#1E66FF;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px">
+          <div style="font-size:11px;color:#5F7FA0;margin-top:10px;line-height:1.6">⚠️ Votre abonnement sera activé sous 24–48h après réception du virement. Envoyez votre preuve de paiement à <strong style="color:#A8C0DC">paiements@makario.cg</strong></div>
+          <button onclick="copyWireRef()" style="width:100%;background:#4A8EFF;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px">
             📋 Copier la référence
           </button>
         </div>
@@ -1282,22 +1278,22 @@ function showPayModal(plan, price) {
 
       <!-- ══ CRYPTO ══ -->
       <div style="margin-bottom:8px">
-        <button onclick="togglePaySection('crypto-section')" style="width:100%;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#0D1931;font-size:14px">
+        <button onclick="togglePaySection('crypto-section')" style="width:100%;background:rgba(129,140,248,.08);border:1.5px solid rgba(221,214,254,.3);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;color:#E0EEFF;font-size:14px">
           <span style="font-size:22px">₿</span>
           <span style="flex:1">Crypto-monnaies</span>
-          <span style="font-size:11px;color:#6B7280">BTC · ETH · USDT</span>
+          <span style="font-size:11px;color:#5F7FA0">BTC · ETH · USDT</span>
           <span id="chevron-crypto" style="font-size:18px">▾</span>
         </button>
-        <div id="crypto-section" style="display:none;background:#FAFAFF;border:1.5px solid #DDD6FE;border-top:none;border-radius:0 0 14px 14px;padding:16px">
+        <div id="crypto-section" style="display:none;background:rgba(129,140,248,.05);border:1.5px solid rgba(221,214,254,.2);border-top:none;border-radius:0 0 14px 14px;padding:16px">
           <div style="display:grid;gap:8px">
-            <button onclick="processCrypto('Bitcoin','${plan}')" style="background:#FFF8E1;border:1.5px solid #FFC107;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#0D1931">
-              <span style="font-size:22px">₿</span><div style="text-align:left"><div style="font-size:13px">Bitcoin (BTC)</div><div style="font-size:11px;color:#6B7280;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/900000).toFixed(5)} BTC</div></div>
+            <button onclick="processCrypto('Bitcoin','${plan}')" style="background:rgba(255,193,7,.08);border:1.5px solid rgba(255,193,7,.3);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#E0EEFF">
+              <span style="font-size:22px">₿</span><div style="text-align:left"><div style="font-size:13px">Bitcoin (BTC)</div><div style="font-size:11px;color:#5F7FA0;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/900000).toFixed(5)} BTC</div></div>
             </button>
-            <button onclick="processCrypto('Ethereum','${plan}')" style="background:#F0F0FF;border:1.5px solid #9C9FE4;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#0D1931">
-              <span style="font-size:22px">Ξ</span><div style="text-align:left"><div style="font-size:13px">Ethereum (ETH)</div><div style="font-size:11px;color:#6B7280;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/1500000).toFixed(4)} ETH</div></div>
+            <button onclick="processCrypto('Ethereum','${plan}')" style="background:rgba(129,140,248,.08);border:1.5px solid rgba(156,159,228,.3);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#E0EEFF">
+              <span style="font-size:22px">Ξ</span><div style="text-align:left"><div style="font-size:13px">Ethereum (ETH)</div><div style="font-size:11px;color:#5F7FA0;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/1500000).toFixed(4)} ETH</div></div>
             </button>
-            <button onclick="processCrypto('USDT','${plan}')" style="background:#F0FFF4;border:1.5px solid #26A17B;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#0D1931">
-              <span style="font-size:22px">₮</span><div style="text-align:left"><div style="font-size:13px">Tether (USDT)</div><div style="font-size:11px;color:#6B7280;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/600).toFixed(2)} USDT</div></div>
+            <button onclick="processCrypto('USDT','${plan}')" style="background:rgba(38,161,123,.08);border:1.5px solid rgba(38,161,123,.3);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;color:#E0EEFF">
+              <span style="font-size:22px">₮</span><div style="text-align:left"><div style="font-size:13px">Tether (USDT)</div><div style="font-size:11px;color:#5F7FA0;font-weight:400">≈ ${(parseInt(price.replace(/\s/g,''))/600).toFixed(2)} USDT</div></div>
             </button>
           </div>
         </div>
@@ -1373,26 +1369,25 @@ function copyWireRef() {
 function showPaymentProcessing(plan, price, method) {
   const m = document.getElementById('pay-modal');
   if (m) m.innerHTML = `
-  <div style="background:#fff;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:48px 28px;text-align:center">
+  <div style="background:#080F1A;border:1px solid rgba(255,255,255,.08);width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:48px 28px;text-align:center">
     <div style="font-size:64px;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
-    <h3 style="font-size:20px;font-weight:800;color:#0D1931;margin-bottom:8px">Traitement en cours…</h3>
-    <p style="color:#6B7280;font-size:14px;margin-bottom:4px">Méthode : <strong>${method}</strong></p>
-    <p style="color:#6B7280;font-size:13px">Ne fermez pas cette page</p>
+    <h3 style="font-size:20px;font-weight:800;color:#E0EEFF;margin-bottom:8px">Traitement en cours…</h3>
+    <p style="color:#A8C0DC;font-size:14px;margin-bottom:4px">Méthode : <strong>${method}</strong></p>
+    <p style="color:#5F7FA0;font-size:13px">Ne fermez pas cette page</p>
   </div>`;
   setTimeout(async () => {
-    // Sauvegarder l'abonnement en base
     await apiFetch('POST', '/subscriptions', { plan, method, price });
     if (m) m.innerHTML = `
-    <div style="background:#fff;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:48px 28px;text-align:center">
-      <div style="width:72px;height:72px;background:linear-gradient(135deg,#2ED47A,#1E66FF);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px">✓</div>
-      <h3 style="font-size:22px;font-weight:800;color:#0D1931;margin-bottom:8px">Paiement confirmé ! 🎉</h3>
-      <p style="color:#6B7280;font-size:14px;margin-bottom:4px">Abonnement <strong>${plan}</strong> activé</p>
-      <p style="color:#6B7280;font-size:13px;margin-bottom:24px">Via ${method}</p>
-      <div style="background:#F0FFF7;border-radius:12px;padding:14px;margin-bottom:24px;font-size:13px;color:#065F46">
+    <div style="background:#080F1A;border:1px solid rgba(255,255,255,.08);width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:48px 28px;text-align:center">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,#2ED47A,#4A8EFF);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px">✓</div>
+      <h3 style="font-size:22px;font-weight:800;color:#E0EEFF;margin-bottom:8px">Paiement confirmé ! 🎉</h3>
+      <p style="color:#A8C0DC;font-size:14px;margin-bottom:4px">Abonnement <strong style="color:#E0EEFF">${plan}</strong> activé</p>
+      <p style="color:#5F7FA0;font-size:13px;margin-bottom:24px">Via ${method}</p>
+      <div style="background:rgba(46,212,122,.08);border:1px solid rgba(46,212,122,.2);border-radius:12px;padding:14px;margin-bottom:24px;font-size:13px;color:#2ED47A">
         ✅ Votre compte a été mis à niveau<br/>✅ Confirmation envoyée par email<br/>✅ Avantages actifs immédiatement
       </div>
       <button onclick="document.getElementById('pay-modal').remove();showToast('Bienvenue dans le plan ${plan} !','success')"
-        style="width:100%;background:linear-gradient(135deg,#1E66FF,#2ED47A);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:800;cursor:pointer">
+        style="width:100%;background:linear-gradient(135deg,#4A8EFF,#2ED47A);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:800;cursor:pointer">
         Accéder à mon espace →
       </button>
     </div>`;
@@ -1448,7 +1443,7 @@ function connectSocket(){
       if(msgs){
         const b=document.createElement('div');
         b.style.cssText='align-self:flex-start;max-width:75%';
-        b.innerHTML=`<div style="background:#f3f4f6;color:#0D1931;padding:10px 14px;border-radius:18px 18px 18px 4px;font-size:14px">${msg.text}</div><div style="font-size:10px;color:#9CA3AF;margin-top:3px">À l'instant</div>`;
+        b.innerHTML=`<div style="background:rgba(255,255,255,.07);color:#E0EEFF;padding:10px 14px;border-radius:18px 18px 18px 4px;font-size:14px">${msg.text}</div><div style="font-size:10px;color:#5F7FA0;margin-top:3px">À l'instant</div>`;
         msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;
       }
     }
@@ -1464,10 +1459,8 @@ async function init(){
     const res = await fetch(API_URL+'/health',{signal:AbortSignal.timeout(2000)});
     const data = await res.json();
     USE_MOCK = !data.success;
-    if(!USE_MOCK) console.log('✅ Backend Makario connecté sur localhost:3000');
   } catch {
     USE_MOCK = true;
-    console.log('ℹ️ Backend absent → Mode démo actif (localStorage)');
   }
 
   // Afficher l'app, masquer le splash
@@ -1483,12 +1476,6 @@ async function init(){
   }
   await loadHome();
 
-  if(USE_MOCK){
-    const badge=document.createElement('div');
-    badge.style.cssText='position:fixed;top:8px;right:8px;background:#F59E0B;color:#fff;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;z-index:9998;opacity:.8';
-    badge.textContent='DÉMO';badge.title='Mode démo — données en localStorage';
-    document.body.appendChild(badge);
-  }
 
   // Barre de progression + classe scrolled sur la navbar
   const _bar = document.getElementById('scroll-progress');
