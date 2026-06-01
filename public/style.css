@@ -769,6 +769,10 @@ img { display: block; }
 }
 .btn-social:hover { background: rgba(74,142,255,.1); border-color: rgba(74,142,255,.3); transform: translateY(-1px); }
 .auth-switch { text-align: center; font-size: 13px; color: var(--text-2); }
+.input-password-wrap { position: relative; display: flex; align-items: center; }
+.input-password-wrap input { flex: 1; padding-right: 44px !important; }
+.toggle-pw { position: absolute; right: 12px; background: none; border: none; color: var(--text-2); cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color var(--transition); }
+.toggle-pw:hover { color: var(--blue); }
 
 /* ─── ABOUT ─── */
 .about-hero {

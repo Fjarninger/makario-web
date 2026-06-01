@@ -375,7 +375,7 @@ function formatTime(d) {
 
 // ─── COMPOSANTS ───────────────────────────────────────────────────
 function companyCard(c) {
-  return `<div class="company-card" onclick="openCompany(${c.id})">
+  return `<div class="company-card" onclick="openCompany('${c.id}')">
     <div class="cc-cover"><div class="cc-avatar" style="font-size:28px;background:linear-gradient(135deg,#1E66FF22,#2ED47A22)">${c.cover||c.init}</div></div>
     <div class="cc-body">
       <div class="cc-header">
@@ -383,13 +383,13 @@ function companyCard(c) {
           <h4 class="cc-name">${c.name}${c.verified?'<span style="background:#D1FAE5;color:#065F46;font-size:9px;padding:2px 6px;border-radius:6px;margin-left:6px;font-weight:800">✓ Vérifié</span>':''}</h4>
           <span class="cc-sector">${c.sector} · ${c.city}${c.country?' · '+c.country:''}</span>
         </div>
-        <button class="fav-btn" onclick="toggleFav(event,${c.id})" data-company-id="${c.id}" style="font-size:18px;background:none;border:none;cursor:pointer;color:#ccc">♡</button>
+        <button class="fav-btn" onclick="toggleFav(event,'${c.id}')" data-company-id="${c.id}" style="font-size:18px;background:none;border:none;cursor:pointer;color:#ccc">♡</button>
       </div>
       <p class="cc-services">${(c.services||'').slice(0,90)}…</p>
       ${c.phone||c.email?`<div style="font-size:11px;color:#6B7280;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap">${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" style="color:#1E66FF;font-weight:600;text-decoration:none">📞 ${c.phone}</a>`:''}${c.email?`<a href="mailto:${c.email}" onclick="event.stopPropagation()" style="color:#1E66FF;font-weight:600;text-decoration:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">✉️ ${c.email}</a>`:''}</div>`:''}
       <div class="cc-actions">
-        <button class="btn-sm btn-primary" onclick="event.stopPropagation();openCompany(${c.id})">Voir</button>
-        <button class="btn-sm btn-outline" onclick="event.stopPropagation();contactCompany(${c.id})">Contacter</button>
+        <button class="btn-sm btn-primary" onclick="event.stopPropagation();openCompany('${c.id}')">Voir</button>
+        <button class="btn-sm btn-outline" onclick="event.stopPropagation();contactCompany('${c.id}')">Contacter</button>
       </div>
     </div>
   </div>`;
@@ -421,7 +421,7 @@ async function loadHome() {
   if (companiesAll.length===0){const r=await apiFetch('GET','/companies');if(r.success)companiesAll=r.data;}
   const spotlight=document.getElementById('spotlight-list');
   if (spotlight) spotlight.innerHTML=companiesAll.slice(0,4).map(c=>`
-    <div class="spotlight-card" onclick="openCompany(${c.id})">
+    <div class="spotlight-card" onclick="openCompany('${c.id}')">
       <div style="font-size:36px;margin-bottom:10px">${c.cover||c.init}</div>
       <div style="font-weight:800;font-size:11px;color:var(--navy,#0D1931);margin-bottom:3px;line-height:1.3">${c.name}</div>
       <div style="font-size:10px;color:var(--blue,#1E66FF);font-weight:700">${c.sector}</div>
@@ -494,7 +494,7 @@ async function loadPeople() {
   if (peopleAll.length === 0) {
     list.innerHTML = skeletonNewsCards(4);
     const r = await apiFetch('GET', '/people');
-    if (r.success) peopleAll = r.data;
+    peopleAll = r.success ? r.data : MOCK.people;
   }
   renderPeople(peopleAll);
 }
@@ -579,7 +579,7 @@ async function loadUniversities() {
   if (universitiesAll.length === 0) {
     list.innerHTML = skeletonNewsCards(3);
     const r = await apiFetch('GET', '/universities');
-    if (r.success) universitiesAll = r.data;
+    universitiesAll = r.success ? r.data : MOCK.universities;
   }
   renderUniversities(universitiesAll);
 }
@@ -683,7 +683,7 @@ async function loadEntrepreneurs() {
   if (entrepreneursAll.length === 0) {
     list.innerHTML = skeletonNewsCards(3);
     const r = await apiFetch('GET', '/entrepreneurs');
-    if (r.success) entrepreneursAll = r.data;
+    entrepreneursAll = r.success ? r.data : MOCK.entrepreneurs;
   }
   renderEntrepreneurs(entrepreneursAll);
 }
@@ -714,7 +714,7 @@ function contactEntrepreneur(entId) {
 // ─── FICHE ENTREPRISE ─────────────────────────────────────────────
 async function openCompany(id){
   goTo('company');
-  let c=companiesAll.find(x=>x.id===id);
+  let c=companiesAll.find(x=>String(x.id)===String(id));
   if(!c){const r=await apiFetch('GET','/companies/'+id);if(r.success)c=r.data;}
   if(!c)return showToast('Entreprise introuvable','error');
   const page=document.getElementById('page-company');
@@ -749,8 +749,8 @@ async function openCompany(id){
       <p style="font-size:13px;color:#A8C0DC;line-height:1.6">${c.vision||'Non renseigné'}</p>
     </div>
     <div style="display:flex;gap:10px">
-      <button class="btn-primary" onclick="contactCompany(${c.id})" style="flex:2">✉️ Contacter</button>
-      <button class="btn-outline" onclick="toggleFav(null,${c.id})" style="flex:1">♡ Favori</button>
+      <button class="btn-primary" onclick="contactCompany('${c.id}')" style="flex:2">✉️ Contacter</button>
+      <button class="btn-outline" onclick="toggleFav(null,'${c.id}')" style="flex:1">♡ Favori</button>
     </div>`;
   page.appendChild(div);
 }
@@ -765,7 +765,7 @@ async function loadNews(){
   const sb=document.getElementById('sidebar-sectors');
   if(sb&&!sb.dataset.loaded){const rs=await apiFetch('GET','/sectors');if(rs.success){sb.innerHTML=rs.data.map(s=>`<div class="sidebar-sector-item" onclick="exploreSector('${s.label}')" style="padding:8px;cursor:pointer;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:6px"><span>${s.icon}</span>${s.label}</div>`).join('');sb.dataset.loaded='1';}}
   const sugg=document.getElementById('suggested-companies');
-  if(sugg&&companiesAll.length>0)sugg.innerHTML=companiesAll.slice(0,3).map(c=>`<div onclick="openCompany(${c.id})" style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-radius:8px"><div style="width:36px;height:36px;border-radius:50%;background:#1E66FF22;display:flex;align-items:center;justify-content:center;font-size:18px">${c.cover||c.init}</div><div><div style="font-size:12px;font-weight:700">${c.name}</div><div style="font-size:11px;color:#6B7280">${c.sector}</div></div></div>`).join('');
+  if(sugg&&companiesAll.length>0)sugg.innerHTML=companiesAll.slice(0,3).map(c=>`<div onclick="openCompany('${c.id}')" style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-radius:8px"><div style="width:36px;height:36px;border-radius:50%;background:#1E66FF22;display:flex;align-items:center;justify-content:center;font-size:18px">${c.cover||c.init}</div><div><div style="font-size:12px;font-weight:700">${c.name}</div><div style="font-size:11px;color:#6B7280">${c.sector}</div></div></div>`).join('');
 }
 
 async function toggleLike(newsId){
@@ -812,7 +812,7 @@ function _selectPubImage(){
     const fd=new FormData();fd.append('file',file);
     const r=await apiUpload(fd);
     if(r.success){
-      _pubImageUrl=r.data.demo?r.data.url:(SOCKET_URL+r.data.url);
+      _pubImageUrl=r.data.url;
       const prev=document.getElementById('pub-img-preview');
       const img=document.getElementById('pub-img-tag');
       if(prev&&img){img.src=_pubImageUrl;prev.style.display='block';}
@@ -838,7 +838,7 @@ async function loadMessages(){
   list.innerHTML=Array.from({length:3},()=>`<div class="conv-item skeleton-card"><div class="sk-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk-title"></div><div class="sk-line" style="width:60%"></div></div></div>`).join('');
   const r=await apiFetch('GET','/conversations');
   if(!r.success||r.data.length===0){list.innerHTML=`<div style="padding:20px;text-align:center"><p style="color:#5F7FA0;margin-bottom:12px">Pas encore de conversations</p><button class="btn-outline sm" onclick="goTo('explore')">Trouver des entreprises</button></div>`;return;}
-  list.innerHTML=r.data.map(c=>`<div class="conv-item" onclick="openConv(${c.id},'${c.name}','${c.init||c.name?.slice(0,2)||'?'}')">
+  list.innerHTML=r.data.map(c=>`<div class="conv-item" onclick="openConv('${c.id}','${c.name}','${c.init||c.name?.slice(0,2)||'?'}')">
     <div class="ci-avatar">${c.init||c.name?.slice(0,2)||'?'}</div>
     <div class="ci-body"><div class="ci-top"><strong>${c.name||'Conversation'}</strong><span class="ci-time">${c.time||''}</span></div>
     <div class="ci-preview">${c.preview||'Démarrer la conversation'}</div></div>
@@ -880,7 +880,7 @@ async function sendMessage(){
 
 async function contactCompany(companyId){
   if(!token){showToast('Connectez-vous pour contacter','error');return goTo('login');}
-  const c=companiesAll.find(x=>x.id===companyId);
+  const c=companiesAll.find(x=>String(x.id)===String(companyId));
   const r=await apiFetch('POST','/conversations',{recipientId:c?.ownerId||99,companyId});
   if(r.success){goTo('messages');setTimeout(()=>openConv(r.data.id,c?.name||'Entreprise',c?.init||'?'),300);}
   else showToast(r.error||'Erreur','error');
@@ -956,8 +956,7 @@ function triggerAvatarUpload(){
     const r=await apiUpload(fd);
     if(r.success){
       const avatarImg=document.getElementById('profile-avatar-img');
-      const url=r.data.demo?r.data.url:(SOCKET_URL+r.data.url);
-      if(avatarImg)avatarImg.src=url;
+      if(avatarImg)avatarImg.src=r.data.url;
       await apiFetch('PUT','/auth/profile',{avatar:r.data.demo?null:r.data.url});
       showToast('Photo de profil mise à jour !','success');
     } else showToast(r.error||'Erreur upload','error');
@@ -1052,6 +1051,15 @@ async function completeRegister(){
   const r=await apiFetch('POST','/auth/register',body);
   if(r.success){token=r.data.token;currentUser=r.data.user;localStorage.setItem('makario_token',token);localStorage.setItem('makario_user',JSON.stringify(currentUser));showToast(`Bienvenue, ${currentUser.name} ! 🎉`,'success');authStep=1;connectSocket();goTo('home');setNavAvatar((currentUser.name?.slice(0,1)||'U').toUpperCase());}
   else showToast(r.error||'Erreur inscription','error');
+}
+
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.querySelector('svg').innerHTML = isHidden
+    ? '<line x1="1" y1="1" x2="23" y2="23"/><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
 }
 
 async function completeLogin(){
