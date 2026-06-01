@@ -114,8 +114,10 @@ function mockSave(key, val) { localStorage.setItem('mk_'+key, JSON.stringify(val
 // ─── ÉTAT GLOBAL ──────────────────────────────────────────────────
 let token        = localStorage.getItem('makario_token') || null;
 let currentUser  = JSON.parse(localStorage.getItem('makario_user')||'null');
-let companiesAll = [];
-let navHistory   = ['home'];
+let companiesAll    = [];
+let companiesPage   = 1;
+let companiesHasMore = false;
+let navHistory      = ['home'];
 let currentConvId = null;
 let likedNewsIds  = JSON.parse(localStorage.getItem('makario_liked')||'[]');
 let mockNews      = mockDB('news', [...MOCK.news]);
@@ -210,12 +212,31 @@ function mockRoute(method, path, body) {
   if (resource === 'companies') {
     const companies = mockDB('companies',[...MOCK.companies]);
     if (method==='GET'&&!id) return {success:true,data:companies};
-    if (method==='GET'&&id) { const c=companies.find(x=>x.id===id); return c?{success:true,data:c}:{success:false,error:'Introuvable'}; }
+    if (method==='GET'&&id) { const c=companies.find(x=>String(x.id)===String(id)); return c?{success:true,data:c}:{success:false,error:'Introuvable'}; }
     if (method==='POST') {
       if (!currentUser) return {success:false,error:'Non authentifié'};
       const c = {id:Date.now(),...body,init:(body.name||'').slice(0,2).toUpperCase(),cover:'🏢',ownerId:currentUser.id,createdAt:new Date().toISOString()};
       companies.push(c); mockSave('companies',companies);
       return {success:true,data:c};
+    }
+    if (method==='PATCH'&&id) {
+      if (!currentUser) return {success:false,error:'Non authentifié'};
+      const idx=companies.findIndex(x=>String(x.id)===String(id));
+      if (idx===-1) return {success:false,error:'Introuvable'};
+      if (String(companies[idx].ownerId)!==String(currentUser.id)) return {success:false,error:'Non autorisé'};
+      Object.assign(companies[idx],body);
+      if (body.name) companies[idx].init=body.name.slice(0,2).toUpperCase();
+      mockSave('companies',companies);
+      return {success:true,data:companies[idx]};
+    }
+    if (method==='DELETE'&&id) {
+      if (!currentUser) return {success:false,error:'Non authentifié'};
+      const idx=companies.findIndex(x=>String(x.id)===String(id));
+      if (idx===-1) return {success:false,error:'Introuvable'};
+      if (String(companies[idx].ownerId)!==String(currentUser.id)) return {success:false,error:'Non autorisé'};
+      companies.splice(idx,1);
+      mockSave('companies',companies);
+      return {success:true};
     }
   }
 
@@ -447,13 +468,40 @@ function switchExploreTab(tab) {
 
 // ─── EXPLORE — ENTREPRISES ────────────────────────────────────────
 async function loadExplore(){
-  if(companiesAll.length===0){const r=await apiFetch('GET','/companies');if(r.success)companiesAll=r.data;}
+  if(companiesAll.length===0){
+    companiesPage=1; companiesHasMore=false;
+    const r=await apiFetch('GET','/companies');
+    if(r.success){
+      companiesAll=r.data;
+      companiesHasMore=r.pagination?r.pagination.page<r.pagination.pages:false;
+    }
+  }
   renderExploreList(companiesAll);
+}
+async function loadMoreCompanies(){
+  if(!companiesHasMore)return;
+  companiesPage++;
+  const r=await apiFetch('GET','/companies?page='+companiesPage);
+  if(r.success){
+    companiesAll=[...companiesAll,...r.data];
+    companiesHasMore=r.pagination?companiesPage<r.pagination.pages:false;
+    renderExploreList(companiesAll);
+  }
 }
 function renderExploreList(list){
   const el=document.getElementById('explore-list');
   if(!el)return;
   el.innerHTML=list.length?list.map(c=>companyCard(c)).join(''):'<div class="empty-state" style="padding:40px;text-align:center;color:#6B7280"><p>Aucune entreprise trouvée</p></div>';
+  let btn=document.getElementById('load-more-companies');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='load-more-companies';
+    btn.style.cssText='display:none;width:100%;margin:16px 0;padding:14px;border:1.5px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.04);color:#A8C0DC;font-weight:700;font-size:13px;cursor:pointer';
+    btn.textContent='Charger plus d\'entreprises ↓';
+    btn.onclick=loadMoreCompanies;
+    el.after(btn);
+  }
+  btn.style.display=companiesHasMore?'block':'none';
 }
 function filterCompanies(){
   const q=(document.getElementById('explore-search')?.value||'').toLowerCase();
@@ -751,8 +799,83 @@ async function openCompany(id){
     <div style="display:flex;gap:10px">
       <button class="btn-primary" onclick="contactCompany('${c.id}')" style="flex:2">✉️ Contacter</button>
       <button class="btn-outline" onclick="toggleFav(null,'${c.id}')" style="flex:1">♡ Favori</button>
-    </div>`;
+    </div>
+    ${currentUser && c.ownerId && String(c.ownerId) === String(currentUser.id) ? `<button class="btn-outline" onclick="showEditCompanyModal('${c.id}')" style="width:100%;margin-top:10px;border-color:rgba(74,142,255,.5);color:#4A8EFF;font-weight:700">✏️ Modifier mon entreprise</button>` : ''}`;
   page.appendChild(div);
+}
+
+// ─── MODIFIER / SUPPRIMER ENTREPRISE ─────────────────────────────
+async function showEditCompanyModal(id) {
+  let c = companiesAll.find(x => String(x.id) === String(id));
+  if (!c) {
+    const r = await apiFetch('GET', '/companies/' + id);
+    if (!r.success) return showToast('Entreprise introuvable', 'error');
+    c = r.data;
+  }
+  let m = document.getElementById('edit-company-modal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'edit-company-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:flex-end;justify-content:center';
+    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+    document.body.appendChild(m);
+  }
+  const esc = s => (s||'').replace(/"/g,'&quot;');
+  m.innerHTML = `<div style="background:#080F1A;border:1px solid rgba(255,255,255,.08);border-bottom:none;width:100%;max-width:500px;border-radius:20px 20px 0 0;padding:24px;max-height:90vh;overflow-y:auto">
+    <h3 style="margin-bottom:16px;font-size:18px;color:#E0EEFF">✏️ Modifier l'entreprise</h3>
+    <div style="display:grid;gap:10px;margin-bottom:16px">
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">NOM</label>
+        <input id="ec-name" value="${esc(c.name)}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">SECTEUR</label>
+        <input id="ec-sector" value="${esc(c.sector)}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">VILLE</label>
+        <input id="ec-city" value="${esc(c.city)}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">TÉLÉPHONE</label>
+        <input id="ec-phone" value="${esc(c.phone)}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">SERVICES</label>
+        <textarea id="ec-services" rows="3" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;resize:vertical;box-sizing:border-box">${c.services||''}</textarea></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">VISION</label>
+        <textarea id="ec-vision" rows="2" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;resize:vertical;box-sizing:border-box">${c.vision||''}</textarea></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">ADRESSE</label>
+        <input id="ec-address" value="${esc(c.address)}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+      <div><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">SITE WEB</label>
+        <input id="ec-website" value="${esc(c.website)}" placeholder="www.example.com" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('edit-company-modal').remove()" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);cursor:pointer;color:#A8C0DC">Annuler</button>
+      <button onclick="saveCompanyEdit('${c.id}')" style="flex:2;padding:12px;background:linear-gradient(135deg,#4A8EFF,#2D6FFF);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Enregistrer</button>
+    </div>
+    <button onclick="deleteCompany('${c.id}')" style="width:100%;margin-top:10px;padding:11px;border:1px solid #EF4444;border-radius:10px;background:transparent;color:#EF4444;cursor:pointer;font-weight:600;font-size:13px">🗑️ Supprimer l'entreprise</button>
+  </div>`;
+}
+
+async function saveCompanyEdit(id) {
+  const name     = document.getElementById('ec-name')?.value.trim();
+  const sector   = document.getElementById('ec-sector')?.value.trim();
+  const city     = document.getElementById('ec-city')?.value.trim();
+  const phone    = document.getElementById('ec-phone')?.value.trim();
+  const services = document.getElementById('ec-services')?.value.trim();
+  const vision   = document.getElementById('ec-vision')?.value.trim();
+  const address  = document.getElementById('ec-address')?.value.trim();
+  const website  = document.getElementById('ec-website')?.value.trim();
+  if (!name || !sector) return showToast('Nom et secteur requis', 'error');
+  const r = await apiFetch('PATCH', '/companies/' + id, { name, sector, city, phone, services, vision, address, website });
+  if (r.success) {
+    companiesAll = companiesAll.map(c => String(c.id) === String(id) ? r.data : c);
+    showToast('Entreprise mise à jour !', 'success');
+    document.getElementById('edit-company-modal')?.remove();
+    openCompany(id);
+  } else showToast(r.error || 'Erreur', 'error');
+}
+
+async function deleteCompany(id) {
+  if (!confirm('Supprimer définitivement cette entreprise ?')) return;
+  const r = await apiFetch('DELETE', '/companies/' + id);
+  if (r.success) {
+    companiesAll = companiesAll.filter(c => String(c.id) !== String(id));
+    showToast('Entreprise supprimée', 'success');
+    document.getElementById('edit-company-modal')?.remove();
+    goBack();
+  } else showToast(r.error || 'Erreur', 'error');
 }
 
 // ─── NEWS ─────────────────────────────────────────────────────────
