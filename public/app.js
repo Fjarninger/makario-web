@@ -1491,8 +1491,9 @@ function processCrypto(coin, plan) {
 }
 
 function copyWireRef() {
-  const refEl = document.querySelector('#wire-section [style*="color:#1E66FF"] strong');
-  const refText = refEl?.textContent || ('MAK-REF-' + Date.now().toString().slice(-6));
+  const refDiv = document.querySelector('#wire-section [style*="color:#4A8EFF"]');
+  const fullText = refDiv?.textContent || '';
+  const refText = fullText.includes(':') ? fullText.split(':').pop().trim() : ('MAK-REF-' + Date.now().toString().slice(-6));
   navigator.clipboard?.writeText(refText).catch(()=>{});
   showToast('Référence copiée !', 'success');
 }
