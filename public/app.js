@@ -1058,6 +1058,15 @@ async function loadProfile(){
     btn.textContent='🔓 Déconnexion';btn.onclick=logout;
     const card=document.querySelector('#page-profile .profile-card');if(card)card.appendChild(btn);
   }
+  // Aperçu CV Premium
+  const bioEl=document.getElementById('cv-bio-preview');
+  const skillsEl=document.getElementById('cv-skills-preview');
+  if(bioEl){bioEl.textContent=currentUser.bio||'';bioEl.style.display=currentUser.bio?'block':'none';}
+  if(skillsEl){
+    const skills=currentUser.skills||[];
+    skillsEl.style.display=skills.length?'flex':'none';
+    skillsEl.innerHTML=skills.map(s=>`<span class="cv-skill-tag">${s}</span>`).join('');
+  }
 }
 
 function logout(){
@@ -1132,6 +1141,114 @@ async function saveProfile(){
     showToast('Profil mis à jour !','success');
     document.getElementById('edit-profile-modal')?.remove();
     loadProfile();
+  } else showToast(r.error||'Erreur','error');
+}
+
+// ─── CV PREMIUM ───────────────────────────────────────────────────
+function showCVPremium(){
+  if(!token){showToast('Connectez-vous pour accéder au CV Premium','error');return goTo('login');}
+  const u=currentUser||{};
+  const skills=(u.skills||[]);
+  const exp=(u.experience||[]);
+  const edu=(u.education||[]);
+  const avatarSrc='https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'U')+'&background=1E66FF&color=fff&size=100';
+  const skillsHTML=skills.length
+    ? `<div class="cv-skills-wrap">${skills.map(s=>`<span class="cv-skill-tag">${s}</span>`).join('')}</div>`
+    : '<p class="cv-empty">Aucune compétence ajoutée</p>';
+  const expHTML=exp.length
+    ? `<div class="cv-timeline">${exp.map(e=>`<div class="cv-timeline-item"><em>${e.company||''}</em><strong>${e.title||''}</strong><span>${e.period||''}</span>${e.desc?`<p>${e.desc}</p>`:''}</div>`).join('')}</div>`
+    : '<p class="cv-empty">Aucune expérience ajoutée</p>';
+  const eduHTML=edu.length
+    ? `<div class="cv-timeline">${edu.map(e=>`<div class="cv-timeline-item"><em>${e.school||''}</em><strong>${e.degree||''}</strong><span>${e.year||''}</span></div>`).join('')}</div>`
+    : '<p class="cv-empty">Aucune formation ajoutée</p>';
+  let overlay=document.getElementById('cv-premium-overlay');
+  if(!overlay){overlay=document.createElement('div');overlay.id='cv-premium-overlay';overlay.className='cv-modal-overlay';overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});document.body.appendChild(overlay);}
+  overlay.innerHTML=`
+    <div class="cv-modal">
+      <div class="cv-modal-header">
+        <img src="${avatarSrc}" class="cv-modal-avatar" alt="avatar"/>
+        <div class="cv-modal-name">${u.name||'Mon profil'}</div>
+        <div class="cv-modal-title">${u.profession||'Professionnel'}</div>
+        <div class="cv-modal-loc">📍 ${u.city||'—'} · ${u.email||''}</div>
+      </div>
+      <div class="cv-modal-body">
+        ${u.bio?`<div class="cv-section"><div class="cv-section-title">À propos</div><div class="cv-bio">${u.bio}</div></div>`:''}
+        <div class="cv-section"><div class="cv-section-title">Compétences</div>${skillsHTML}</div>
+        <div class="cv-section"><div class="cv-section-title">Expériences</div>${expHTML}</div>
+        <div class="cv-section"><div class="cv-section-title">Formation</div>${eduHTML}</div>
+      </div>
+      <div class="cv-modal-actions">
+        <button class="btn-premium" onclick="window.print()">Imprimer / PDF</button>
+        <button class="btn-outline mt" style="margin-top:0" onclick="showEditCVModal()">Modifier le CV</button>
+        <button onclick="document.getElementById('cv-premium-overlay').remove()" style="background:none;border:none;color:#5F7FA0;cursor:pointer;font-size:13px;padding:10px">Fermer</button>
+      </div>
+    </div>`;
+}
+
+function showEditCVModal(){
+  if(!token){showToast('Connectez-vous','error');return goTo('login');}
+  const u=currentUser||{};
+  const expList=u.experience?.length?u.experience:[{}];
+  const eduList=u.education?.length?u.education:[{}];
+  let m=document.getElementById('edit-cv-modal');
+  if(!m){m=document.createElement('div');m.id='edit-cv-modal';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1001;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px;overflow-y:auto';m.addEventListener('click',e=>{if(e.target===m)m.remove();});document.body.appendChild(m);}
+  m.innerHTML=`<div style="background:#080F1A;border:1px solid rgba(247,181,0,.25);width:100%;max-width:500px;border-radius:20px;padding:24px">
+    <h3 style="margin-bottom:16px;font-size:18px;color:#E0EEFF">Compléter mon CV Premium</h3>
+    <div style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">RÉSUMÉ / BIO</label><textarea id="ecv-bio" placeholder="Présentez-vous en quelques phrases…" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;height:80px;resize:vertical">${u.bio||''}</textarea></div>
+    <div style="margin-bottom:14px"><label style="font-size:11px;font-weight:700;color:#5F7FA0;display:block;margin-bottom:5px">COMPÉTENCES <span style="font-weight:400">(séparées par des virgules)</span></label><input id="ecv-skills" value="${(u.skills||[]).join(', ')}" placeholder="Ex: Gestion de projet, Finance, Marketing…" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/></div>
+    <p style="font-size:12px;font-weight:700;color:#5F7FA0;letter-spacing:1px;margin-bottom:8px">EXPÉRIENCE PROFESSIONNELLE</p>
+    <div id="ecv-exp-container">${expList.map(e=>_expBlockHTML(e)).join('')}</div>
+    <button onclick="addExpBlock()" style="width:100%;border:1.5px dashed rgba(255,255,255,.15);border-radius:10px;background:none;color:#4A8EFF;padding:9px;font-size:13px;cursor:pointer;margin-bottom:14px">+ Ajouter une expérience</button>
+    <p style="font-size:12px;font-weight:700;color:#5F7FA0;letter-spacing:1px;margin-bottom:8px">FORMATION</p>
+    <div id="ecv-edu-container">${eduList.map(e=>_eduBlockHTML(e)).join('')}</div>
+    <button onclick="addEduBlock()" style="width:100%;border:1.5px dashed rgba(255,255,255,.15);border-radius:10px;background:none;color:#4A8EFF;padding:9px;font-size:13px;cursor:pointer;margin-bottom:16px">+ Ajouter une formation</button>
+    <div style="display:flex;gap:10px">
+      <button onclick="document.getElementById('edit-cv-modal').remove()" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);cursor:pointer;color:#A8C0DC">Annuler</button>
+      <button onclick="saveCVProfile()" style="flex:2;padding:12px;background:linear-gradient(135deg,#F7B500,#E09000);color:#000;border:none;border-radius:10px;font-weight:800;cursor:pointer">Enregistrer le CV</button>
+    </div>
+  </div>`;
+}
+
+function _expBlockHTML(e={}){
+  return `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:10px" class="ecv-exp-block">
+    <input placeholder="Titre du poste" class="ecv-field" data-key="title" value="${e.title||''}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;margin-bottom:7px"/>
+    <input placeholder="Entreprise" class="ecv-field" data-key="company" value="${e.company||''}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;margin-bottom:7px"/>
+    <input placeholder="Période (ex: 2021–2023)" class="ecv-field" data-key="period" value="${e.period||''}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;margin-bottom:7px"/>
+    <textarea placeholder="Description des missions…" class="ecv-field" data-key="desc" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;height:65px;resize:vertical">${e.desc||''}</textarea>
+  </div>`;
+}
+function _eduBlockHTML(e={}){
+  return `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:10px" class="ecv-edu-block">
+    <input placeholder="Diplôme / Formation" class="ecv-field" data-key="degree" value="${e.degree||''}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;margin-bottom:7px"/>
+    <input placeholder="Établissement" class="ecv-field" data-key="school" value="${e.school||''}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box;margin-bottom:7px"/>
+    <input placeholder="Année (ex: 2019)" class="ecv-field" data-key="year" value="${e.year||''}" style="width:100%;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E0EEFF;border-radius:10px;padding:10px 14px;font-size:14px;box-sizing:border-box"/>
+  </div>`;
+}
+function addExpBlock(){const c=document.getElementById('ecv-exp-container');if(c)c.insertAdjacentHTML('beforeend',_expBlockHTML());}
+function addEduBlock(){const c=document.getElementById('ecv-edu-container');if(c)c.insertAdjacentHTML('beforeend',_eduBlockHTML());}
+
+async function saveCVProfile(){
+  const bio=document.getElementById('ecv-bio')?.value.trim()||'';
+  const skillsRaw=document.getElementById('ecv-skills')?.value||'';
+  const skills=skillsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  const experience=[...document.querySelectorAll('.ecv-exp-block')].map(b=>({
+    title:b.querySelector('[data-key="title"]')?.value.trim()||'',
+    company:b.querySelector('[data-key="company"]')?.value.trim()||'',
+    period:b.querySelector('[data-key="period"]')?.value.trim()||'',
+    desc:b.querySelector('[data-key="desc"]')?.value.trim()||''
+  })).filter(e=>e.title||e.company);
+  const education=[...document.querySelectorAll('.ecv-edu-block')].map(b=>({
+    degree:b.querySelector('[data-key="degree"]')?.value.trim()||'',
+    school:b.querySelector('[data-key="school"]')?.value.trim()||'',
+    year:b.querySelector('[data-key="year"]')?.value.trim()||''
+  })).filter(e=>e.degree||e.school);
+  const r=await apiFetch('PUT','/auth/profile',{bio,skills,experience,education});
+  if(r.success){
+    currentUser=r.data;localStorage.setItem('makario_user',JSON.stringify(currentUser));
+    showToast('CV mis à jour !','success');
+    document.getElementById('edit-cv-modal')?.remove();
+    loadProfile();
+    showCVPremium();
   } else showToast(r.error||'Erreur','error');
 }
 

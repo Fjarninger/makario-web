@@ -615,6 +615,42 @@ img { display: block; }
 .info-row:last-of-type { border-bottom: none; }
 .info-row label { font-size: 13px; color: var(--gray); font-weight: 500; }
 .info-row span { font-size: 13px; color: var(--text); font-weight: 600; }
+
+/* ─── CV PREMIUM ─── */
+.cv-premium-card { border-color: rgba(247,181,0,.35) !important; background: linear-gradient(135deg, rgba(247,181,0,.06) 0%, rgba(10,21,40,.98) 100%) !important; position: relative; overflow: hidden; }
+.cv-premium-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(247,181,0,.15) 0%, transparent 70%); pointer-events: none; }
+.cv-premium-badge { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #F7B500, #E09000); color: #000; font-size: 10px; font-weight: 900; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+.cv-premium-desc { font-size: 13px; color: var(--gray); margin-top: 4px; margin-bottom: 0; line-height: 1.5; }
+.cv-bio-preview { font-size: 13px; color: var(--text-2); margin-top: 12px; font-style: italic; border-left: 2px solid rgba(247,181,0,.4); padding-left: 10px; line-height: 1.6; }
+.cv-skills-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.cv-skill-tag { background: rgba(74,142,255,.12); border: 1px solid rgba(74,142,255,.3); color: #4A8EFF; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.btn-premium { background: linear-gradient(135deg, #F7B500, #E09000); color: #000; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 800; font-size: 13px; cursor: pointer; letter-spacing: .3px; transition: opacity var(--transition); }
+.btn-premium:hover { opacity: .88; }
+
+/* ─── CV MODAL ─── */
+.cv-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 1000; display: flex; align-items: flex-start; justify-content: center; padding: 20px 16px; overflow-y: auto; }
+.cv-modal { background: var(--card-bg); border: 1px solid rgba(247,181,0,.25); border-radius: 20px; width: 100%; max-width: 600px; }
+.cv-modal-header { background: linear-gradient(135deg, #030911 0%, #0D2040 100%); border-radius: 20px 20px 0 0; padding: 32px 28px 28px; text-align: center; position: relative; overflow: hidden; }
+.cv-modal-header::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 80%, rgba(247,181,0,.12) 0%, transparent 70%); pointer-events: none; }
+.cv-modal-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(247,181,0,.5); margin-bottom: 12px; }
+.cv-modal-name { font-size: 22px; font-weight: 800; color: #E0EEFF; margin-bottom: 4px; }
+.cv-modal-title { font-size: 14px; color: #F7B500; font-weight: 600; margin-bottom: 8px; }
+.cv-modal-loc { font-size: 13px; color: #5F7FA0; }
+.cv-modal-body { padding: 24px 28px; }
+.cv-section { margin-bottom: 24px; }
+.cv-section-title { font-size: 11px; font-weight: 900; letter-spacing: 1.5px; color: #F7B500; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid rgba(247,181,0,.2); }
+.cv-bio { font-size: 14px; color: var(--text-2); line-height: 1.7; }
+.cv-skills-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
+.cv-timeline { display: flex; flex-direction: column; gap: 14px; }
+.cv-timeline-item { border-left: 2px solid rgba(74,142,255,.3); padding-left: 14px; position: relative; }
+.cv-timeline-item::before { content: ''; width: 8px; height: 8px; background: #4A8EFF; border-radius: 50%; position: absolute; left: -5px; top: 4px; }
+.cv-timeline-item strong { display: block; font-size: 14px; font-weight: 700; color: #E0EEFF; }
+.cv-timeline-item em { display: block; font-size: 12px; font-style: normal; color: #F7B500; font-weight: 600; margin-bottom: 2px; }
+.cv-timeline-item span { font-size: 12px; color: var(--gray); }
+.cv-timeline-item p { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+.cv-empty { font-size: 13px; color: var(--gray); font-style: italic; }
+.cv-modal-actions { display: flex; gap: 10px; padding: 0 28px 24px; flex-wrap: wrap; }
+
 .enterprise-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 .ent-tile {
   background: rgba(255,255,255,.04); border: 1.5px solid var(--border); border-radius: var(--radius-sm);

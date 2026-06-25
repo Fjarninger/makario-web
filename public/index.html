@@ -505,6 +505,17 @@
           <div class="followed-sectors" id="followed-sectors"></div>
           <button class="btn-outline mt" onclick="goTo('explore')">Gérer mes secteurs</button>
         </div>
+        <div class="profile-card cv-premium-card">
+          <div class="cv-premium-badge">✦ PREMIUM</div>
+          <h4>Mon CV Professionnel</h4>
+          <p class="cv-premium-desc">Créez un CV digital premium partageable avec vos contacts Makario.</p>
+          <div id="cv-bio-preview" class="cv-bio-preview" style="display:none"></div>
+          <div id="cv-skills-preview" class="cv-skills-preview" style="display:none"></div>
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn-premium" onclick="showCVPremium()">Voir mon CV</button>
+            <button class="btn-outline mt" style="margin-top:0" onclick="showEditCVModal()">Compléter le CV</button>
+          </div>
+        </div>
         <div class="profile-card full">
           <h4>Mon espace entreprise</h4>
           <div class="enterprise-grid">
