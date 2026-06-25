@@ -5,6 +5,12 @@
 
 const RAILWAY_URL  = 'https://makario-server.onrender.com';
 
+// ─── AVATAR helper (DiceBear — gratuit, sans API key) ─────────────
+function getAvatar(name, size=100){
+  const seed=encodeURIComponent((name||'U').trim());
+  return `https://api.dicebear.com/9.x/initials/svg?seed=${seed}&backgroundColor=1e66ff,2d6fff,1a50cc&backgroundType=gradientLinear&fontFamily=Outfit&fontWeight=700&fontSize=38&size=${size}`;
+}
+
 const _isLocal     = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const SOCKET_URL   = _isLocal ? 'http://localhost:3000' : RAILWAY_URL;
 const API_URL      = SOCKET_URL + '/api';
@@ -370,6 +376,26 @@ function showToast(msg, type) {
   clearTimeout(t._timer); t._timer = setTimeout(()=>{t.style.opacity='0';},2800);
 }
 
+// ─── GEO AUTO-DETECT (ipwho.is — gratuit, sans API key) ──────────
+async function detectCity(){
+  const sel=document.getElementById('reg-city');
+  if(!sel)return;
+  const btn=document.querySelector('#step2-personal button[onclick="detectCity()"]');
+  if(btn){btn.textContent='⏳ Détection…';btn.disabled=true;}
+  try{
+    const r=await fetch('https://ipwho.is/',{signal:AbortSignal.timeout(4000)});
+    const d=await r.json();
+    if(d.success&&d.city){
+      const city=d.city;
+      const exists=[...sel.options].find(o=>o.value.toLowerCase()===city.toLowerCase());
+      if(exists){sel.value=exists.value;}
+      else{const o=document.createElement('option');o.value=city;o.textContent=city;o.selected=true;sel.appendChild(o);}
+      showToast('📍 Ville détectée : '+city,'success');
+    }else showToast('Ville non détectée','error');
+  }catch{showToast('Impossible de détecter la ville','error');}
+  finally{if(btn){btn.textContent='📍 Détecter automatiquement';btn.disabled=false;}}
+}
+
 // ─── NAVIGATION ───────────────────────────────────────────────────
 function goTo(page) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -380,6 +406,7 @@ function goTo(page) {
   const map = {home:loadHome,explore:loadExplore,news:loadNews,messages:loadMessages,favorites:loadFavorites,profile:loadProfile,dashboard:loadDashboard};
   if (map[page]) map[page]();
   window.scrollTo(0,0);
+  if(typeof AOS!=='undefined') setTimeout(()=>AOS.refresh(),120);
 }
 
 function goBack() {
@@ -396,7 +423,7 @@ function formatTime(d) {
 
 // ─── COMPOSANTS ───────────────────────────────────────────────────
 function companyCard(c) {
-  return `<div class="company-card" onclick="openCompany('${c.id}')">
+  return `<div class="company-card" data-aos="fade-up" onclick="openCompany('${c.id}')">
     <div class="cc-cover"><div class="cc-avatar" style="font-size:28px;background:linear-gradient(135deg,#1E66FF22,#2ED47A22)">${c.cover||c.initials}</div></div>
     <div class="cc-body">
       <div class="cc-header">
@@ -1040,7 +1067,7 @@ async function loadProfile(){
   // Avatar
   setNavAvatar((currentUser.name?.slice(0,1)||'U').toUpperCase());
   const avatarImg=document.getElementById('profile-avatar-img');
-  if(avatarImg)avatarImg.src='https://ui-avatars.com/api/?name='+encodeURIComponent(currentUser.name||'U')+'&background=1E66FF&color=fff&size=100';
+  if(avatarImg)avatarImg.src=getAvatar(currentUser.name||'U',100);
   // Lignes d'infos
   document.querySelectorAll('#page-profile .info-row').forEach(row=>{
     const lbl=(row.querySelector('label')?.textContent||'').toLowerCase();
@@ -1151,7 +1178,7 @@ function showCVPremium(){
   const skills=(u.skills||[]);
   const exp=(u.experience||[]);
   const edu=(u.education||[]);
-  const avatarSrc='https://ui-avatars.com/api/?name='+encodeURIComponent(u.name||'U')+'&background=1E66FF&color=fff&size=100';
+  const avatarSrc=getAvatar(u.name||'U',160);
   const skillsHTML=skills.length
     ? `<div class="cv-skills-wrap">${skills.map(s=>`<span class="cv-skill-tag">${s}</span>`).join('')}</div>`
     : '<p class="cv-empty">Aucune compétence ajoutée</p>';
@@ -1725,6 +1752,8 @@ async function init(){
   }
   await loadHome();
 
+  // Init AOS (Animate On Scroll — gratuit via unpkg.com/aos)
+  if(typeof AOS!=='undefined') AOS.init({duration:550,easing:'ease-out-quart',once:true,offset:40,delay:0});
 
   // Barre de progression + classe scrolled sur la navbar
   const _bar = document.getElementById('scroll-progress');
